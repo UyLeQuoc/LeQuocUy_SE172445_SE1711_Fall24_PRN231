@@ -1,5 +1,5 @@
 ﻿using BusinessObjects;
-using Microsoft.Extensions.Configuration; // Để đọc cấu hình từ appsettings.json
+using Microsoft.Extensions.Configuration;
 
 namespace DataAccessObjects
 {
@@ -38,6 +38,45 @@ namespace DataAccessObjects
             accountList.AddRange(dbAccounts);
 
             return accountList;
+        }
+
+        public SystemAccount GetSystemAccountById(short id)
+        {
+            return context.SystemAccounts.FirstOrDefault(account => account.AccountId == id);
+        }
+
+        public void AddSystemAccount(SystemAccount systemAccount)
+        {
+            context.SystemAccounts.Add(systemAccount);
+            context.SaveChanges();
+        }
+
+        public void UpdateSystemAccount(SystemAccount systemAccount)
+        {
+            var existingAccount = context.SystemAccounts.FirstOrDefault(a => a.AccountId == systemAccount.AccountId);
+            if (existingAccount != null)
+            {
+                existingAccount.AccountName = systemAccount.AccountName;
+                existingAccount.AccountEmail = systemAccount.AccountEmail;
+                existingAccount.AccountRole = systemAccount.AccountRole;
+                existingAccount.AccountPassword = systemAccount.AccountPassword;
+
+                context.SaveChanges();
+            }
+        }
+
+        public void DeleteSystemAccount(short id)
+        {
+            var systemAccount = context.SystemAccounts.FirstOrDefault(a => a.AccountId == id);
+            if (systemAccount != null && !context.NewsArticles.Any(na => na.CreatedById == id))
+            {
+                context.SystemAccounts.Remove(systemAccount);
+                context.SaveChanges();
+            }
+            else
+            {
+                throw new InvalidOperationException("Cannot delete account associated with news articles.");
+            }
         }
 
         public SystemAccount Login(string email, string password)
