@@ -1,5 +1,6 @@
-using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
@@ -12,39 +13,49 @@ namespace RazorPagesFE.Pages
         public string Email { get; set; }
         [BindProperty]
         public string Password { get; set; }
-
-        private readonly IHttpClientFactory _httpClientFactory;
-
-        public LoginModel(IHttpClientFactory httpClientFactory)
-        {
-            _httpClientFactory = httpClientFactory;
-        }
+        public string Message { get; set; }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var httpClient = _httpClientFactory.CreateClient();
-            var response = await httpClient.PostAsJsonAsync("http://localhost:5178/odata/SystemAccounts/Login", new { AccountEmail = Email, AccountPassword = Password });
-
-            if (response.IsSuccessStatusCode)
+            var loginRequest = new
             {
-                var account = await response.Content.ReadFromJsonAsync<SystemAccount>();
-
-                var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, account.AccountName),
-                new Claim(ClaimTypes.Email, account.AccountEmail),
-                new Claim(ClaimTypes.Role, account.AccountRole == 0 ? "Admin" : "Staff")
+                Email = Email,
+                Password = Password
             };
 
-                var claimsIdentity = new ClaimsIdentity(claims, "CookieAuth");
-                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+            using (var httpClient = new HttpClient())
+            {
+                var response = await httpClient.PostAsJsonAsync("http://localhost:5178/odata/SystemAccounts/Login", loginRequest);
 
-                await HttpContext.SignInAsync("CookieAuth", claimsPrincipal);
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<LoginResponseDTO>();
 
-                return RedirectToPage("/Index");
+                    // Lưu JWT token vào localStorage (hoặc sessionStorage)
+                    HttpContext.Session.SetString("JWTToken", result.Token);
+                    HttpContext.Session.SetString("Role", result.Role.ToString());
+                    HttpContext.Session.SetString("AccountId", result.AccountId.ToString());
+
+                    // Tạo ClaimsPrincipal để lưu trữ thông tin đăng nhập
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, loginRequest.Email),
+                        new Claim("Role", result.Role.ToString()),
+                        new Claim("AccountId", result.AccountId.ToString())
+                    };
+
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var principal = new ClaimsPrincipal(identity);
+
+                    // Lưu thông tin đăng nhập vào cookie
+                    await HttpContext.SignInAsync("CookieAuth", principal);
+
+                    return RedirectToPage("/Index");
+                }
+
+                Message = "Invalid email or password";
             }
 
-            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return Page();
         }
     }

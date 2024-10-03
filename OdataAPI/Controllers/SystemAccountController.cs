@@ -1,8 +1,13 @@
 ﻿using BusinessObjects;
+using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
+using Microsoft.IdentityModel.Tokens;
 using Services;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace OdataAPI.Controllers
 {
@@ -68,14 +73,50 @@ namespace OdataAPI.Controllers
         }
 
         [HttpPost("Login")]
-        public IActionResult Login([FromBody] SystemAccount loginRequest)
+        public IActionResult Login([FromBody] LoginRequestDTO loginDTO)
         {
-            var account = systemAccountService.Login(loginRequest.AccountEmail, loginRequest.AccountPassword);
+            var account = systemAccountService.Login(loginDTO.Email, loginDTO.Password);
             if (account == null)
             {
                 return Unauthorized("Invalid email or password.");
             }
-            return Ok(account);
+            account.NewsArticles = null;
+            var token = GenerateJwtToken(account);
+            var role = account.AccountRole; //0:Admin 1:Staff 2:Manager
+            var accountId = account.AccountId;
+            return Ok(new
+            {
+                token,
+                role,
+                accountId
+            });
+        }
+
+        public string GenerateJwtToken(SystemAccount account)
+        {
+            IConfiguration configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", true, true).Build();
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Email, account.AccountEmail),
+                new Claim("Role", account.AccountRole.ToString()),
+                new Claim("AccountId", account.AccountId.ToString()),
+                new Claim("AccountName", account.AccountName)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:SecretKey"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: configuration["JWT:Issuer"],
+                audience: configuration["JWT:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(30),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

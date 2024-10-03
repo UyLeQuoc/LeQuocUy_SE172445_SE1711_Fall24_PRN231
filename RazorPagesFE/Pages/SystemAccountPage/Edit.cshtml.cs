@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace RazorPagesFE.Pages.SystemAccount
+namespace RazorPagesFE.Pages.SystemAccountPage
 {
     public class EditModel : PageModel
     {

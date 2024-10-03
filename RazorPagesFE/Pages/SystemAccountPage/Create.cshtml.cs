@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace RazorPagesFE.Pages.SystemAccount
+namespace RazorPagesFE.Pages.SystemAccountPage
 {
     public class CreateModel : PageModel
     {
