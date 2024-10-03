@@ -81,19 +81,8 @@ namespace OdataAPI.Controllers
                 return Unauthorized("Invalid email or password.");
             }
             account.NewsArticles = null;
-            var token = GenerateJwtToken(account);
-            var role = account.AccountRole; //0:Admin 1:Staff 2:Manager
-            var accountId = account.AccountId;
-            return Ok(new
-            {
-                token,
-                role,
-                accountId
-            });
-        }
 
-        public string GenerateJwtToken(SystemAccount account)
-        {
+            //Generate JWT Token
             IConfiguration configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", true, true).Build();
@@ -109,14 +98,22 @@ namespace OdataAPI.Controllers
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:SecretKey"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
+            var preparedToken = new JwtSecurityToken(
                 issuer: configuration["JWT:Issuer"],
                 audience: configuration["JWT:Audience"],
                 claims: claims,
                 expires: DateTime.Now.AddMinutes(30),
                 signingCredentials: creds);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var token = new JwtSecurityTokenHandler().WriteToken(preparedToken);
+            var role = account.AccountRole.ToString(); //0:Admin 1:Staff 2:Manager
+            var accountId = account.AccountId.ToString();
+            return Ok(new
+            {
+                token,
+                role,
+                accountId
+            });
         }
     }
 }
