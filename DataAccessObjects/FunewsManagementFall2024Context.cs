@@ -77,10 +77,10 @@ public partial class FunewsManagementFall2024Context : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_NewsArticle_Category");
 
-            entity.HasOne(d => d.CreatedBy).WithMany(p => p.NewsArticles)
-                .HasForeignKey(d => d.CreatedById)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_NewsArticle_SystemAccount");
+            //entity.HasOne(d => d.CreatedBy).WithMany(p => p.NewsArticles)
+            //    .HasForeignKey(d => d.CreatedById)
+            //    .OnDelete(DeleteBehavior.Cascade)
+            //    .HasConstraintName("FK_NewsArticle_SystemAccount");
 
             entity.HasMany(d => d.Tags).WithMany(p => p.NewsArticles)
                 .UsingEntity<Dictionary<string, object>>(

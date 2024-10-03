@@ -6,7 +6,6 @@ using Services;
 
 namespace OdataAPI.Controllers
 {
-    [Route("odata/Categories")]
     public class CategoryController : ODataController
     {
         private readonly ICategoryService categoryService;

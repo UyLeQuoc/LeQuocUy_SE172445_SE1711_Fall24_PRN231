@@ -1,6 +1,9 @@
+using BusinessObjects;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OData.ModelBuilder;
+using OdataAPI.Controllers;
 using Repositories;
 using Services;
 using System.Text;
@@ -10,18 +13,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+var modelBuilder = new ODataConventionModelBuilder();
+//modelBuilder.EntityType<Category>();
+modelBuilder.EntityType<Order>();
+modelBuilder.EntitySet<Customer>("Customers");
+modelBuilder.EntitySet<SystemAccount>("SystemAccounts");
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
-        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-    });
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
+    })
+    .AddOData(
+    options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(null).AddRouteComponents(
+        "odata",
+        modelBuilder.GetEdmModel()));
 
-//Dependency Injection - Setup Odata
-builder.Services.AddControllers().AddOData(options =>
-{
-    options.Select().Filter().OrderBy().Count().SetMaxTop(100).SkipToken();
-});
 //Dependency Injection
 builder.Services.AddScoped<ISystemAccountRepository, SystemAccountRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -75,8 +83,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRouting();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 
 app.Run();

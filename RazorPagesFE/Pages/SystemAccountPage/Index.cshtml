@@ -1,54 +1,104 @@
 ﻿@page
-@model             IndexModel
+@model RazorPagesFE.Pages.SystemAccountPage.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "System Accounts";
 }
 
-<h1>Index</h1>
+<h1>System Accounts</h1>
 
 <p>
     <a asp-page="Create">Create New</a>
 </p>
+
+@{
+    if(Model.Message != null)
+    {
+        <div class="alert alert-info" role="alert">
+            @Model.Message
+        </div>
+    }
+}
+
+<!-- Search and Filter Form -->
+<form method="get">
+    <div class="form-group">
+        <label for="SearchName">Search by Name</label>
+        <input type="text" id="SearchName" name="SearchName" value="@Model.SearchName" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="SearchEmail">Search by Email</label>
+        <input type="text" id="SearchEmail" name="SearchEmail" value="@Model.SearchEmail" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="SortBy">Sort By</label>
+        <select id="SortBy" name="SortBy" class="form-control">
+            <option value="AccountName" selected="@Model.SortBy == 'AccountName' ? true: false">Name</option>
+            <option value="AccountEmail" selected="@Model.SortBy == 'AccountEmail' ? true: false">Email</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="Ascending">Sort Order</label>
+        <select id="Ascending" name="Ascending" class="form-control">
+            <option value="true" selected="@Model.Ascending ? true: false">Ascending</option>
+            <option value="false" selected="@Model.Ascending ? true: false">Descending</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+<!-- Display Data in Table -->
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.SystemAccount[0].AccountName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SystemAccount[0].AccountEmail)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SystemAccount[0].AccountRole)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.SystemAccount[0].AccountPassword)
-            </th>
+            <th>@Html.DisplayNameFor(model => model.SystemAccounts[0].AccountName)</th>
+            <th>@Html.DisplayNameFor(model => model.SystemAccounts[0].AccountEmail)</th>
+            <th>@Html.DisplayNameFor(model => model.SystemAccounts[0].AccountRole)</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.SystemAccount) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.AccountName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AccountEmail)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AccountRole)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AccountPassword)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.AccountId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.AccountId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.AccountId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var account in Model.SystemAccounts)
+        {
+            <tr>
+                <td>@account.AccountName</td>
+                <td>@account.AccountEmail</td>
+                <td>
+                    @if (account.AccountRole == 0)
+                    {
+                        <span>Admin</span>
+                    }
+                    else if (account.AccountRole == 1)
+                    {
+                        <span>Staff</span>
+                    }
+                    else if (account.AccountRole == 2)
+                    {
+                        <span>Lecturer</span>
+                    }
+                </td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@account.AccountId">Edit</a> |
+                    <a asp-page="./Details" asp-route-id="@account.AccountId">Details</a> |
+                    <a asp-page="./Delete" asp-route-id="@account.AccountId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+<!-- Pagination Controls -->
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @for (int i = 1; i <= Math.Ceiling((double)Model.TotalCount / Model.PageSize); i++)
+        {
+            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                <a class="page-link" asp-route-currentPage="@i" asp-route-SortBy="@Model.SortBy" asp-route-Ascending="@Model.Ascending">@(i)</a>
+            </li>
+        }
+    </ul>
+</nav>

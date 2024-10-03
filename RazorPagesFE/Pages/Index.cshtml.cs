@@ -27,7 +27,7 @@ namespace RazorPagesFE.Pages
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                var response = await httpClient.GetAsync("http://localhost:5178/odata/SystemAccounts/CurrentUser");
+                var response = await httpClient.GetAsync("http://localhost:5178/CurrentUser");
 
                 if (response.IsSuccessStatusCode)
                 {

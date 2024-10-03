@@ -1,7 +1,10 @@
-﻿namespace BusinessObjects;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BusinessObjects;
 
 public partial class SystemAccount
 {
+    [Key]
     public short AccountId { get; set; }
 
     public string? AccountName { get; set; }
@@ -12,5 +15,5 @@ public partial class SystemAccount
 
     public string? AccountPassword { get; set; }
 
-    public virtual ICollection<NewsArticle> NewsArticles { get; set; } = new List<NewsArticle>();
+    //public virtual ICollection<NewsArticle> NewsArticles { get; set; } = new List<NewsArticle>();
 }

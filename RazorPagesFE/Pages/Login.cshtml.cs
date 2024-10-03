@@ -22,7 +22,7 @@ namespace RazorPagesFE.Pages
 
             using (var httpClient = new HttpClient())
             {
-                var response = await httpClient.PostAsJsonAsync("http://localhost:5178/odata/SystemAccounts/Login", loginRequest);
+                var response = await httpClient.PostAsJsonAsync("http://localhost:5178/Login", loginRequest);
 
                 if (response.IsSuccessStatusCode)
                 {
