@@ -12,13 +12,13 @@ namespace OdataAPI.Controllers
 
         public CategoriesController(ICategoryService service)
         {
-            this.categoryService = service;
+            categoryService = service;
         }
 
         [EnableQuery]
-        public ActionResult<IQueryable<Category>> Get()
+        public ActionResult<IEnumerable<Category>> Get()
         {
-            var categories = categoryService.GetCategories().AsQueryable();
+            var categories = categoryService.GetCategories();
             return Ok(categories);
         }
 
@@ -33,35 +33,44 @@ namespace OdataAPI.Controllers
             return Ok(category);
         }
 
-        //[HttpPost]
-        //public IActionResult Post([FromBody] Category category)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        [HttpPost]
+        public IActionResult Post([FromBody] Category category)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    categoryService.CreateCategory(category);
-        //    return Created(category);
-        //}
+            categoryService.CreateCategory(category);
+            return Created(category);
+        }
 
-        //[HttpPut]
-        //public IActionResult Put([FromRoute] short id, [FromBody] Category category)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        [HttpPut("/odata/Categories/{id}")]
+        public IActionResult Put([FromRoute] short id, [FromBody] Category category)
+        {
+            try
+            {
+                categoryService.UpdateCategory(category);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
-        //    categoryService.UpdateCategory(category);
-        //    return NoContent();
-        //}
-
-        //[HttpDelete]
-        //public IActionResult Delete([FromRoute] short id)
-        //{
-        //    categoryService.RemoveCategory(id);
-        //    return NoContent();
-        //}
+        [HttpDelete("/odata/Categories/{id}")]
+        public IActionResult Delete([FromRoute] short id)
+        {
+            try
+            {
+                categoryService.RemoveCategory(id);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

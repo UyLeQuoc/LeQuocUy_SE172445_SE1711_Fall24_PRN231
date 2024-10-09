@@ -1,33 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using BusinessObjects;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace RazorPagesFE.Pages.CategoryPage
 {
     public class CreateModel : PageModel
     {
-        private readonly BusinessObjects.FunewsManagementFall2024Context _context;
-
-        public CreateModel(BusinessObjects.FunewsManagementFall2024Context context)
-        {
-            _context = context;
-        }
-
-        public IActionResult OnGet()
-        {
-        ViewData["ParentCategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryDesciption");
-            return Page();
-        }
-
         [BindProperty]
-        public Category Category { get; set; } = default!;
+        public Category Category { get; set; }
 
-        // For more information, see https://aka.ms/RazorPagesCRUD.
+        public string Message { get; set; }
+
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -35,10 +21,41 @@ namespace RazorPagesFE.Pages.CategoryPage
                 return Page();
             }
 
-            _context.Categories.Add(Category);
-            await _context.SaveChangesAsync();
+            try
+            {
+                var token = HttpContext.Session.GetString("JWTToken");
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RedirectToPage("/NotAuthorized");
+                }
 
-            return RedirectToPage("./Index");
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    var jsonContent = JsonConvert.SerializeObject(Category);
+                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                    var response = await httpClient.PostAsync("http://localhost:5178/odata/Categories", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        TempData["SuccessMessage"] = "Category created successfully!";
+                        return RedirectToPage("./Index");
+                    }
+                    else
+                    {
+                        Message = "Failed to create category.";
+                    }
+                }
+
+                return Page();
+            }
+            catch (Exception e)
+            {
+                Message = e.Message;
+                return Page();
+            }
         }
     }
 }

@@ -1,26 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using BusinessObjects;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace RazorPagesFE.Pages.CategoryPage
 {
     public class EditModel : PageModel
     {
-        private readonly BusinessObjects.FunewsManagementFall2024Context _context;
-
-        public EditModel(BusinessObjects.FunewsManagementFall2024Context context)
-        {
-            _context = context;
-        }
-
         [BindProperty]
-        public Category Category { get; set; } = default!;
+        public Category Category { get; set; }
+
+        public string Message { get; set; }
 
         public async Task<IActionResult> OnGetAsync(short? id)
         {
@@ -29,18 +21,40 @@ namespace RazorPagesFE.Pages.CategoryPage
                 return NotFound();
             }
 
-            var category =  await _context.Categories.FirstOrDefaultAsync(m => m.CategoryId == id);
-            if (category == null)
+            try
             {
-                return NotFound();
+                var token = HttpContext.Session.GetString("JWTToken");
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RedirectToPage("/NotAuthorized");
+                }
+
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/Categories({id})");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        Category = JsonConvert.DeserializeObject<Category>(jsonString);
+                    }
+                    else
+                    {
+                        Message = "Failed to load category data.";
+                    }
+                }
+
+                return Page();
             }
-            Category = category;
-           ViewData["ParentCategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryDesciption");
-            return Page();
+            catch (Exception e)
+            {
+                Message = e.Message;
+                return Page();
+            }
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -48,30 +62,41 @@ namespace RazorPagesFE.Pages.CategoryPage
                 return Page();
             }
 
-            _context.Attach(Category).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                var token = HttpContext.Session.GetString("JWTToken");
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RedirectToPage("/NotAuthorized");
+                }
+
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    var jsonContent = JsonConvert.SerializeObject(Category);
+                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                    var response = await httpClient.PutAsync($"http://localhost:5178/odata/Categories({Category.CategoryId})", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        TempData["SuccessMessage"] = "Category updated successfully!";
+                        return RedirectToPage("./Index");
+                    }
+                    else
+                    {
+                        Message = "Failed to update category.";
+                    }
+                }
+
+                return Page();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception e)
             {
-                if (!CategoryExists(Category.CategoryId))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                Message = e.Message;
+                return Page();
             }
-
-            return RedirectToPage("./Index");
-        }
-
-        private bool CategoryExists(short id)
-        {
-            return _context.Categories.Any(e => e.CategoryId == id);
         }
     }
 }

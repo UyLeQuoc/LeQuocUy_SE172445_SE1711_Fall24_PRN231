@@ -26,7 +26,7 @@ namespace DataAccessObjects
 
         public List<Category> GetCategories()
         {
-            return context.Categories.Where(category => category.IsActive == true).ToList();
+            return context.Categories.ToList();
         }
 
         public Category GetCategoryById(short id)
@@ -36,8 +36,25 @@ namespace DataAccessObjects
 
         public void AddCategory(Category category)
         {
-            context.Categories.Add(category);
-            context.SaveChanges();
+            try
+            {
+                var categories = GetCategories();
+                short maxId = categories.Max(c => c.CategoryId);
+
+                if (categories.Any(c => c.CategoryName == category.CategoryName))
+                {
+                    throw new InvalidOperationException("Category name already exists.");
+                }
+
+                category.CategoryId = (short)(maxId + 1);
+
+                context.Categories.Add(category);
+                context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Failed to add category: {e.Message}", e);
+            }
         }
 
         public void UpdateCategory(Category category)
@@ -51,16 +68,29 @@ namespace DataAccessObjects
                 existingCategory.ParentCategoryId = category.ParentCategoryId;
                 context.SaveChanges();
             }
+            else
+            {
+                throw new InvalidOperationException("Category not found.");
+            }
         }
 
         public void DeleteCategory(short id)
         {
             var category = context.Categories.FirstOrDefault(c => c.CategoryId == id);
-            if (category != null && !context.NewsArticles.Any(na => na.CategoryId == id))
+            if (category == null)
             {
-                context.Categories.Remove(category);
-                context.SaveChanges();
+                throw new InvalidOperationException("Category not found.");
             }
+
+            bool isCategoryUsedInArticles = context.NewsArticles.Any(na => na.CategoryId == id);
+
+            if (isCategoryUsedInArticles)
+            {
+                throw new InvalidOperationException("Cannot delete category associated with news articles.");
+            }
+
+            context.Categories.Remove(category);
+            context.SaveChanges();
         }
     }
 }

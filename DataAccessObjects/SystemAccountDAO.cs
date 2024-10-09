@@ -71,6 +71,10 @@ namespace DataAccessObjects
 
         public void UpdateSystemAccount(SystemAccount systemAccount)
         {
+            if (systemAccount.AccountId == 0)
+            {
+                throw new Exception("Not Update Admin Account");
+            }
             var existingAccount = context.SystemAccounts.FirstOrDefault(a => a.AccountId == systemAccount.AccountId);
             if (existingAccount != null)
             {
@@ -89,6 +93,13 @@ namespace DataAccessObjects
             {
                 throw new InvalidOperationException("Cannot delete admin account.");
             }
+            //Check account is associated with news articles
+            NewsArticleDAO newsArticle = NewsArticleDAO.Instance;
+            if (newsArticle.GetNewsArticles().Any(na => na.CreatedById == id))
+            {
+                throw new InvalidOperationException("Cannot delete account associated with news articles.");
+            }
+
             var systemAccount = context.SystemAccounts.FirstOrDefault(a => a.AccountId == id);
             if (systemAccount != null && !context.NewsArticles.Any(na => na.CreatedById == id))
             {

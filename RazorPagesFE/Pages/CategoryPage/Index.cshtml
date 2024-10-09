@@ -7,48 +7,79 @@
 
 <h1>Category Management</h1>
 
+@if (Model.Message.Length != 0)
+{
+    <div class="alert alert-info" role="alert">
+        @Model.Message
+    </div>
+}
+
+<!-- Search Form -->
+<form method="get">
+    <div class="form-group">
+        <label for="SearchName">Search by Category Name</label>
+        <input type="text" id="SearchName" name="SearchName" value="@Model.SearchName" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="SortBy">Sort By</label>
+        <select id="SortBy" name="SortBy" class="form-control">
+            <option value="CategoryName" selected="@Model.SortBy == 'CategoryName' ? true: false">Category Name</option>
+            <option value="CategoryDesciption" selected="@Model.SortBy == 'CategoryDesciption' ? true: false">Description</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="Ascending">Sort Order</label>
+        <select id="Ascending" name="Ascending" class="form-control">
+            <option value="true" selected="@Model.Ascending ? true: false">Ascending</option>
+            <option value="false" selected="!@Model.Ascending ? true: false">Descending</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
 <p>
     <a asp-page="Create">Create New</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Category[0].CategoryName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category[0].CategoryDesciption)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category[0].IsActive)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Category[0].ParentCategory)
-            </th>
+            <th>@Html.DisplayNameFor(model => model.Categories[0].CategoryName)</th>
+            <th>@Html.DisplayNameFor(model => model.Categories[0].CategoryDesciption)</th>
+            <th>@Html.DisplayNameFor(model => model.Categories[0].IsActive)</th>
+            <th>@Html.DisplayNameFor(model => model.Categories[0].ParentCategory)</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Category) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.CategoryName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CategoryDesciption)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsActive)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ParentCategory.CategoryDesciption)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.CategoryId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.CategoryId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.CategoryId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model.Categories)
+        {
+            <tr>
+                <td>@item.CategoryName</td>
+                <td>@item.CategoryDesciption</td>
+                <td>@item.IsActive</td>
+                <td>@item.ParentCategory?.CategoryName</td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@item.CategoryId">Edit</a> |
+                    <a asp-page="./Details" asp-route-id="@item.CategoryId">Details</a> |
+                    <a asp-page="./Delete" asp-route-id="@item.CategoryId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+<!-- Pagination Controls -->
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        @for (int i = 1; i <= Math.Ceiling((double)Model.TotalCount / Model.PageSize); i++)
+        {
+            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                <a class="page-link" asp-route-currentPage="@i" asp-route-SortBy="@Model.SortBy" asp-route-Ascending="@Model.Ascending">@(i)</a>
+            </li>
+        }
+    </ul>
+</nav>
