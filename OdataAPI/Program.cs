@@ -18,6 +18,7 @@ var modelBuilder = new ODataConventionModelBuilder();
 modelBuilder.EntityType<Order>();
 modelBuilder.EntitySet<Customer>("Customers");
 modelBuilder.EntitySet<SystemAccount>("SystemAccounts");
+modelBuilder.EntitySet<Category>("Categories");
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

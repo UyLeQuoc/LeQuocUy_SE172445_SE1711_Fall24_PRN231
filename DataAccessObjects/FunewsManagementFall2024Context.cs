@@ -27,7 +27,7 @@ public partial class FunewsManagementFall2024Context : DbContext
     {
         if (!optionsBuilder.IsConfigured)
         {
-            optionsBuilder.UseSqlServer(GetConnectionString());
+            optionsBuilder.UseSqlServer(GetConnectionString()).EnableSensitiveDataLogging();
         }
     }
 

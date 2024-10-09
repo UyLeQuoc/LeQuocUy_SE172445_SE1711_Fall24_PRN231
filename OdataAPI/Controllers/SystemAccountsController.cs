@@ -28,28 +28,28 @@ namespace OdataAPI.Controllers
             return Ok(accounts);
         }
 
-        //[EnableQuery]
-        //public ActionResult<SystemAccount> Get([FromRoute] short id)
-        //{
-        //    var account = systemAccountService.GetSystemAccountById(id);
-        //    if (account == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    return Ok(account);
-        //}
+        [EnableQuery]
+        public ActionResult<SystemAccount> Get([FromRoute] short key)
+        {
+            var account = systemAccountService.GetSystemAccountById(key);
+            if (account == null)
+            {
+                return NotFound();
+            }
+            return Ok(account);
+        }
 
-        //[HttpPost]
-        //public IActionResult Post([FromBody] SystemAccount systemAccount)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        [HttpPost]
+        public IActionResult Post([FromBody] SystemAccount systemAccount)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    systemAccountService.CreateSystemAccount(systemAccount);
-        //    return Created(systemAccount);
-        //}
+            systemAccountService.CreateSystemAccount(systemAccount);
+            return Created(systemAccount);
+        }
 
         //[HttpPut("{id}")]
         //public IActionResult Put([FromRoute] short id, [FromBody] SystemAccount systemAccount)
