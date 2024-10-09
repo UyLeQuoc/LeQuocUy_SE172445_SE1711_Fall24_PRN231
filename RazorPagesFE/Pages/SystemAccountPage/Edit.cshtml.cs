@@ -1,71 +1,111 @@
 ﻿using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace RazorPagesFE.Pages.SystemAccountPage
 {
     public class EditModel : PageModel
     {
-        private readonly FunewsManagementFall2024Context _context;
-
-        public EditModel(FunewsManagementFall2024Context context)
-        {
-            _context = context;
-        }
-
         [BindProperty]
-        public SystemAccount SystemAccount { get; set; } = default!;
+        public SystemAccount SystemAccount { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(short? id)
+        public string Message { get; set; }
+
+        public async Task<IActionResult> OnGetAsync(int id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                var token = HttpContext.Session.GetString("JWTToken");
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RedirectToPage("/NotAuthorized");
+                }
 
-            var systemaccount = await _context.SystemAccounts.FirstOrDefaultAsync(m => m.AccountId == id);
-            if (systemaccount == null)
-            {
-                return NotFound();
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/SystemAccounts/{id}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        SystemAccount = JsonConvert.DeserializeObject<SystemAccount>(jsonString);
+                    }
+                    else
+                    {
+                        Message = "Failed to load account details.";
+                        return Page();
+                    }
+                }
+
+                return Page();
             }
-            SystemAccount = systemaccount;
-            return Page();
+            catch (Exception e)
+            {
+                Message = e.Message;
+                return Page();
+            }
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more information, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(int id)
         {
             if (!ModelState.IsValid)
             {
                 return Page();
             }
 
-            _context.Attach(SystemAccount).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SystemAccountExists(SystemAccount.AccountId))
+                var token = HttpContext.Session.GetString("JWTToken");
+                if (string.IsNullOrEmpty(token))
                 {
-                    return NotFound();
+                    return RedirectToPage("/NotAuthorized");
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return RedirectToPage("./Index");
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    var jsonContent = JsonConvert.SerializeObject(SystemAccount);
+                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                    var response = await httpClient.PutAsync($"http://localhost:5178/odata/SystemAccounts/{id}", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        TempData["SuccessMessage"] = "Account updated successfully!";
+                        return RedirectToPage("./Index");
+                    }
+                    else
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+                        Message = $"Failed to update account: {errorResponse.Error.Message}";
+                    }
+                }
+
+                return Page();
+            }
+            catch (Exception e)
+            {
+                Message = e.Message;
+                return Page();
+            }
         }
 
-        private bool SystemAccountExists(short id)
+        public class ErrorResponse
         {
-            return _context.SystemAccounts.Any(e => e.AccountId == id);
+            public ErrorDetail Error { get; set; }
+        }
+
+        public class ErrorDetail
+        {
+            public string Code { get; set; }
+            public string Message { get; set; }
         }
     }
 }

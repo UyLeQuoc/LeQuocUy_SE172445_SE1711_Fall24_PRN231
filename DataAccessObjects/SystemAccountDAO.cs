@@ -47,8 +47,26 @@ namespace DataAccessObjects
 
         public void AddSystemAccount(SystemAccount systemAccount)
         {
-            context.SystemAccounts.Add(systemAccount);
-            context.SaveChanges();
+
+            try
+            {
+                var accounts = GetSystemAccounts();
+                short maxId = accounts.Max(a => a.AccountId);
+
+                //Check exist email
+                if (accounts.Any(a => a.AccountEmail == systemAccount.AccountEmail))
+                {
+                    throw new InvalidOperationException("Email already exists.");
+                }
+
+                systemAccount.AccountId = (short)(maxId + 1);
+                context.SystemAccounts.Add(systemAccount);
+                context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         public void UpdateSystemAccount(SystemAccount systemAccount)
@@ -67,6 +85,10 @@ namespace DataAccessObjects
 
         public void DeleteSystemAccount(short id)
         {
+            if (id == 0)
+            {
+                throw new InvalidOperationException("Cannot delete admin account.");
+            }
             var systemAccount = context.SystemAccounts.FirstOrDefault(a => a.AccountId == id);
             if (systemAccount != null && !context.NewsArticles.Any(na => na.CreatedById == id))
             {

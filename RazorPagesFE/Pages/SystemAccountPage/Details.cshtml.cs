@@ -1,38 +1,49 @@
 ﻿using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
 
 namespace RazorPagesFE.Pages.SystemAccountPage
 {
     public class DetailsModel : PageModel
     {
-        private readonly FunewsManagementFall2024Context _context;
+        public SystemAccount SystemAccount { get; set; }
+        public string Message { get; set; }
 
-        public DetailsModel(FunewsManagementFall2024Context context)
+        public async Task<IActionResult> OnGetAsync(int id)
         {
-            _context = context;
-        }
-
-        public SystemAccount SystemAccount { get; set; } = default!;
-
-        public async Task<IActionResult> OnGetAsync(short? id)
-        {
-            if (id == null)
+            try
             {
-                return NotFound();
-            }
+                var token = HttpContext.Session.GetString("JWTToken");
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RedirectToPage("/NotAuthorized");
+                }
 
-            var systemaccount = await _context.SystemAccounts.FirstOrDefaultAsync(m => m.AccountId == id);
-            if (systemaccount == null)
-            {
-                return NotFound();
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/SystemAccounts/{id}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        SystemAccount = JsonConvert.DeserializeObject<SystemAccount>(jsonString);
+                    }
+                    else
+                    {
+                        Message = "Failed to load account details.";
+                    }
+                }
+
+                return Page();
             }
-            else
+            catch (Exception e)
             {
-                SystemAccount = systemaccount;
+                Message = e.Message;
+                return Page();
             }
-            return Page();
         }
     }
 }

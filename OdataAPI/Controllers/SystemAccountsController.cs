@@ -51,24 +51,38 @@ namespace OdataAPI.Controllers
             return Created(systemAccount);
         }
 
-        //[HttpPut("{id}")]
-        //public IActionResult Put([FromRoute] short id, [FromBody] SystemAccount systemAccount)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        [HttpPut("/odata/SystemAccounts/{id}")]
+        public IActionResult Put([FromRoute] short id, [FromBody] SystemAccount systemAccount)
+        {
+            try
+            {
+                systemAccountService.UpdateSystemAccount(systemAccount);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
-        //    systemAccountService.UpdateSystemAccount(systemAccount);
-        //    return NoContent();
-        //}
-
-        //[HttpDelete("{id}")]
-        //public IActionResult Delete([FromRoute] short id)
-        //{
-        //    systemAccountService.RemoveSystemAccount(id);
-        //    return NoContent();
-        //}
+        [HttpDelete("/odata/SystemAccounts/{id}")]
+        public IActionResult Delete([FromRoute] short id)
+        {
+            try
+            {
+                short accountId = short.Parse(User.FindFirst("AccountId")?.Value);
+                if (accountId == id)
+                {
+                    throw new InvalidOperationException("Cannot delete current account.");
+                }
+                systemAccountService.RemoveSystemAccount(id);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
         [HttpPost("Login")]
         public IActionResult Login([FromBody] LoginRequestDTO loginDTO)

@@ -1,58 +1,81 @@
 ﻿using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
 
 namespace RazorPagesFE.Pages.SystemAccountPage
 {
     public class DeleteModel : PageModel
     {
-        private readonly FunewsManagementFall2024Context _context;
-
-        public DeleteModel(FunewsManagementFall2024Context context)
-        {
-            _context = context;
-        }
-
-        [BindProperty]
-        public SystemAccount SystemAccount { get; set; } = default!;
+        public SystemAccount SystemAccount { get; set; }
+        public string Message { get; set; }
 
         public async Task<IActionResult> OnGetAsync(short? id)
         {
-            if (id == null)
+            var token = HttpContext.Session.GetString("JWTToken");
+            if (string.IsNullOrEmpty(token))
             {
-                return NotFound();
+                return RedirectToPage("/NotAuthorized");
             }
 
-            var systemaccount = await _context.SystemAccounts.FirstOrDefaultAsync(m => m.AccountId == id);
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await httpClient.GetAsync($"http://localhost:5178/odata/SystemAccounts/{id}");
 
-            if (systemaccount == null)
-            {
-                return NotFound();
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    SystemAccount = JsonConvert.DeserializeObject<SystemAccount>(jsonString);
+                }
+                else
+                {
+                    Message = "Failed to load account details.";
+                }
             }
-            else
-            {
-                SystemAccount = systemaccount;
-            }
+
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(short? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var systemaccount = await _context.SystemAccounts.FindAsync(id);
-            if (systemaccount != null)
+            using (var httpClient = new HttpClient())
             {
-                SystemAccount = systemaccount;
-                _context.SystemAccounts.Remove(SystemAccount);
-                await _context.SaveChangesAsync();
+                var token = HttpContext.Session.GetString("JWTToken");
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RedirectToPage("/NotAuthorized");
+                }
+
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await httpClient.DeleteAsync($"http://localhost:5178/odata/SystemAccounts/{id}");
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["SuccessMessage"] = "Account deleted successfully!";
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+                    TempData["SuccessMessage"] = $"Failed to delete account: {errorResponse.Error.Message}";
+                }
             }
 
             return RedirectToPage("./Index");
+
+
         }
+    }
+    public class ErrorResponse
+    {
+        public ErrorDetail Error { get; set; }
+    }
+
+    public class ErrorDetail
+    {
+        public string Code { get; set; }
+        public string Message { get; set; }
     }
 }

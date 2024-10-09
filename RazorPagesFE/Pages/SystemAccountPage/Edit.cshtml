@@ -1,50 +1,39 @@
-﻿@page
-@model             EditModel
+﻿@page "{id:int}"
+@model RazorPagesFE.Pages.SystemAccountPage.EditModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Account";
 }
 
-<h1>Edit</h1>
+<h1>Edit Account</h1>
 
-<h4>SystemAccount</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="SystemAccount.AccountId" />
-            <div class="form-group">
-                <label asp-for="SystemAccount.AccountName" class="control-label"></label>
-                <input asp-for="SystemAccount.AccountName" class="form-control" />
-                <span asp-validation-for="SystemAccount.AccountName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SystemAccount.AccountEmail" class="control-label"></label>
-                <input asp-for="SystemAccount.AccountEmail" class="form-control" />
-                <span asp-validation-for="SystemAccount.AccountEmail" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SystemAccount.AccountRole" class="control-label"></label>
-                <input asp-for="SystemAccount.AccountRole" class="form-control" />
-                <span asp-validation-for="SystemAccount.AccountRole" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SystemAccount.AccountPassword" class="control-label"></label>
-                <input asp-for="SystemAccount.AccountPassword" class="form-control" />
-                <span asp-validation-for="SystemAccount.AccountPassword" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert alert-danger">@Model.Message</div>
+}
+
+<form method="post">
+    <div class="form-group">
+        <label asp-for="SystemAccount.AccountName"></label>
+        <input asp-for="SystemAccount.AccountName" class="form-control" />
     </div>
-</div>
+    <div class="form-group">
+        <label asp-for="SystemAccount.AccountEmail"></label>
+        <input asp-for="SystemAccount.AccountEmail" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="SystemAccount.AccountRole"></label>
+        <select asp-for="SystemAccount.AccountRole" class="form-control">
+            <option value="0">Admin</option>
+            <option value="1">Staff</option>
+            <option value="2">Lecturer</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label asp-for="SystemAccount.AccountPassword"></label>
+        <input asp-for="SystemAccount.AccountPassword" class="form-control" type="password" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
 
-<div>
-    <a asp-page="./Index">Back to List</a>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+<a asp-page="./Index" class="btn btn-secondary">Back to List</a>

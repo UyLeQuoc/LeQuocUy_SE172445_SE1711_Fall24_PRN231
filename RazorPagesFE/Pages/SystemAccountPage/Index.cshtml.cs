@@ -39,6 +39,11 @@ namespace RazorPagesFE.Pages.SystemAccountPage
                     return RedirectToPage("/NotAuthorized");
                 }
 
+                if (TempData["SuccessMessage"] != null)
+                {
+                    Message = TempData["SuccessMessage"].ToString();
+                }
+
                 using (var httpClient = new HttpClient())
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
