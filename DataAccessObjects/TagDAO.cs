@@ -33,31 +33,65 @@ namespace DataAccessObjects
         {
             return context.Tags.FirstOrDefault(tag => tag.TagId == id);
         }
-
         public void AddTag(Tag tag)
         {
-            context.Tags.Add(tag);
-            context.SaveChanges();
-        }
-
-        public void UpdateTag(Tag tag)
-        {
-            var existingTag = context.Tags.FirstOrDefault(t => t.TagId == tag.TagId);
-            if (existingTag != null)
+            try
             {
-                existingTag.TagName = tag.TagName;
-                existingTag.Note = tag.Note;
+                if (context.Tags.Any(t => t.TagName == tag.TagName))
+                {
+                    throw new InvalidOperationException("Tag already exists.");
+                }
+
+                context.Tags.Add(tag);
                 context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error adding tag: {ex.Message}", ex);
             }
         }
 
+        public void UpdateTag(Tag updatedTag)
+        {
+            try
+            {
+                var existingTag = context.Tags.FirstOrDefault(t => t.TagId == updatedTag.TagId);
+                if (existingTag == null)
+                {
+                    throw new InvalidOperationException("Tag not found.");
+                }
+
+                existingTag.TagName = updatedTag.TagName;
+                existingTag.Note = updatedTag.Note;
+
+                context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error updating tag: {ex.Message}", ex);
+            }
+        }
         public void DeleteTag(int id)
         {
-            var tag = context.Tags.FirstOrDefault(t => t.TagId == id);
-            if (tag != null)
+            try
             {
+                var tag = context.Tags.FirstOrDefault(t => t.TagId == id);
+                if (tag == null)
+                {
+                    throw new InvalidOperationException("Tag not found.");
+                }
+
+                if (context.NewsArticles.Any(na => na.Tags.Any(t => t.TagId == id)))
+                {
+                    throw new InvalidOperationException("Cannot delete tag associated with news articles.");
+                }
+
                 context.Tags.Remove(tag);
                 context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error deleting tag: {ex.Message}", ex);
             }
         }
     }

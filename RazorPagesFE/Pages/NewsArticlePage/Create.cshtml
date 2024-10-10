@@ -7,6 +7,13 @@
 
 <h1>Create News Article</h1>
 
+@if(Model.Message.Length != 0)
+{
+    <div class="alert alert-danger" role="alert">
+        @Model.Message
+    </div>
+}
+
 <form method="post">
     <div class="form-group">
         <label asp-for="NewsArticle.NewsTitle"></label>

@@ -40,7 +40,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                     // Fetch categories
-                    var response = await httpClient.GetAsync("http://localhost:5178/odata/Categories?$filter=IsActive eq true");
+                    var response = await httpClient.GetAsync("http://localhost:5178/odata/Categories");
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
@@ -48,7 +48,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                         Categories = odataResponse.Value;
                     }
 
-                    // Fetch Tags
+                    // Fetch tags
                     response = await httpClient.GetAsync("http://localhost:5178/odata/Tags");
                     if (response.IsSuccessStatusCode)
                     {
@@ -56,13 +56,14 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                         Tags = JsonConvert.DeserializeObject<ODataResponse<Tag>>(jsonString).Value;
                     }
 
-                    // Fetch news article details
-                    response = await httpClient.GetAsync($"http://localhost:5178/odata/NewsArticles({id})?$expand=Tags");
+                    // Fetch the news article details
+                    response = await httpClient.GetAsync($"http://localhost:5178/odata/NewsArticles/{id}?$expand=Tags");
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
                         NewsArticle = JsonConvert.DeserializeObject<NewsArticle>(jsonString);
 
+                        // Pre-select the existing tags
                         SelectedTagIds = NewsArticle.Tags.Select(t => t.TagId).ToList();
                     }
                     else
@@ -99,11 +100,14 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
+                    // Set the selected tags to the news article
                     NewsArticle.Tags = SelectedTagIds.Select(tagId => new Tag { TagId = tagId }).ToList();
 
+                    // Serialize the updated article
                     var jsonContent = JsonConvert.SerializeObject(NewsArticle);
                     var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
+                    // Send PUT request to update the article
                     var response = await httpClient.PutAsync($"http://localhost:5178/odata/NewsArticles/{NewsArticle.NewsArticleId}", content);
 
                     if (response.IsSuccessStatusCode)
@@ -113,7 +117,9 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                     }
                     else
                     {
-                        Message = "Failed to update news article.";
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+                        throw new Exception(errorResponse.Error.Message);
                     }
                 }
             }

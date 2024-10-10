@@ -49,7 +49,7 @@ namespace OdataAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] NewsArticleDTO newsArticleDTO)
+        public IActionResult Post([FromBody] NewsArticle newsArticle)
         {
             try
             {
@@ -58,8 +58,8 @@ namespace OdataAPI.Controllers
                     return BadRequest(ModelState);
                 }
 
-                newsArticleService.CreateNewsArticle(newsArticleDTO);
-                return Created(newsArticleDTO);
+                newsArticleService.CreateNewsArticle(newsArticle);
+                return Created(newsArticle);
             }
             catch (Exception ex)
             {

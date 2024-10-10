@@ -18,7 +18,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
         public List<Category> Categories { get; set; } = new List<Category>();
         public List<Tag> Tags { get; set; } = new List<Tag>();
 
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -94,7 +94,9 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                     }
                     else
                     {
-                        Message = "Failed to create news article.";
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+                        throw new Exception(errorResponse.Error.Message);
                     }
                 }
             }

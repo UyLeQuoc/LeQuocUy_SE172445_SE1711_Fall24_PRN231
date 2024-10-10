@@ -16,7 +16,7 @@ namespace Repositories
             return NewsArticleDAO.Instance.GetNewsArticleById(id);
         }
 
-        public void AddNewsArticle(NewsArticleDTO newsArticle)
+        public void AddNewsArticle(NewsArticle newsArticle)
         {
             NewsArticleDAO.Instance.AddNewsArticle(newsArticle);
         }

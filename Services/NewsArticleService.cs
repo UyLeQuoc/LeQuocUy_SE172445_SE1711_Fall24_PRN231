@@ -23,7 +23,7 @@ namespace Services
             return newsArticleRepository.GetNewsArticleById(id);
         }
 
-        public void CreateNewsArticle(NewsArticleDTO newsArticle)
+        public void CreateNewsArticle(NewsArticle newsArticle)
         {
             newsArticleRepository.AddNewsArticle(newsArticle);
         }
@@ -37,5 +37,6 @@ namespace Services
         {
             newsArticleRepository.DeleteNewsArticle(id);
         }
+
     }
 }

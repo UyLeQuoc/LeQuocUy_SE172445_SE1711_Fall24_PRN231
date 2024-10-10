@@ -7,7 +7,7 @@ namespace Services
     {
         List<NewsArticle> GetNewsArticles();
         NewsArticle GetNewsArticleById(string id);
-        void CreateNewsArticle(NewsArticleDTO newsArticle);
+        void CreateNewsArticle(NewsArticle newsArticle);
         void UpdateNewsArticle(NewsArticleDTO newsArticle);
         void RemoveNewsArticle(string id);
     }

@@ -41,23 +41,17 @@ namespace DataAccessObjects
             return null;
         }
 
-        public void AddNewsArticle(NewsArticleDTO newsArticleDTO)
+        public void AddNewsArticle(NewsArticle newsArticle)
         {
-            var newArticle = new NewsArticle
+            try
             {
-                NewsArticleId = newsArticleDTO.NewsArticleId,
-                NewsTitle = newsArticleDTO.NewsTitle,
-                Headline = newsArticleDTO.Headline,
-                NewsContent = newsArticleDTO.NewsContent,
-                NewsSource = newsArticleDTO.NewsSource,
-                CategoryId = newsArticleDTO.CategoryId,
-                NewsStatus = newsArticleDTO.NewsStatus,
-                CreatedById = newsArticleDTO.CreatedById,
-                CreatedDate = DateTime.Now,
-                Tags = context.Tags.Where(t => newsArticleDTO.TagIds.Contains(t.TagId)).ToList()
-            };
-            context.NewsArticles.Add(newArticle);
-            context.SaveChanges();
+                context.NewsArticles.Add(newsArticle);
+                context.SaveChanges();
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Failed to add news article: {e.Message}", e);
+            }
         }
 
         public void UpdateNewsArticle(NewsArticleDTO newsArticleDTO)

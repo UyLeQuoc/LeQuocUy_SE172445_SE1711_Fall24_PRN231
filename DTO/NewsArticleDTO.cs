@@ -2,7 +2,7 @@
 {
     public class NewsArticleDTO
     {
-        public string NewsArticleId { get; set; } = null!;
+        public string? NewsArticleId { get; set; } = null!;
         public string? NewsTitle { get; set; }
         public string Headline { get; set; } = null!;
         public string? NewsContent { get; set; }

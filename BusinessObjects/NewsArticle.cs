@@ -2,13 +2,13 @@
 
 public partial class NewsArticle
 {
-    public string NewsArticleId { get; set; } = null!;
+    public string? NewsArticleId { get; set; } = null!;
 
     public string? NewsTitle { get; set; }
 
     public string Headline { get; set; } = null!;
 
-    public DateTime? CreatedDate { get; set; }
+    public DateTime? CreatedDate { get; set; } = DateTime.Now;
 
     public string? NewsContent { get; set; }
 

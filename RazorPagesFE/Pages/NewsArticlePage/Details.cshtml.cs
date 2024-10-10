@@ -30,7 +30,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/NewsArticles({id})?$expand=Category,CreatedBy");
+                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/NewsArticles/{id}?$expand=Category,CreatedBy,Tags");
 
                     if (response.IsSuccessStatusCode)
                     {
