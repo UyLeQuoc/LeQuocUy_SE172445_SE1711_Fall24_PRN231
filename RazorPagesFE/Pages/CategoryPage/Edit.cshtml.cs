@@ -24,6 +24,7 @@ namespace RazorPagesFE.Pages.CategoryPage
 
             try
             {
+
                 var token = HttpContext.Session.GetString("JWTToken");
                 if (string.IsNullOrEmpty(token))
                 {
@@ -64,13 +65,12 @@ namespace RazorPagesFE.Pages.CategoryPage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return await OnGetAsync(Category.CategoryId);
+                }
                 var token = HttpContext.Session.GetString("JWTToken");
                 if (string.IsNullOrEmpty(token))
                 {

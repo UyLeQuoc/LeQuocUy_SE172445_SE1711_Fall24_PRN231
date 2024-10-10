@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Repositories;
 
 namespace Services
@@ -12,22 +12,22 @@ namespace Services
             this.newsArticleRepository = repository;
         }
 
-        public List<NewsArticle> GetNewsArticles()
+        public List<NewsArticleDTO> GetNewsArticles()
         {
             return newsArticleRepository.GetNewsArticles();
         }
 
-        public NewsArticle GetNewsArticleById(string id)
+        public NewsArticleDTO GetNewsArticleById(string id)
         {
             return newsArticleRepository.GetNewsArticleById(id);
         }
 
-        public void CreateNewsArticle(NewsArticle newsArticle)
+        public void CreateNewsArticle(NewsArticleDTO newsArticle)
         {
             newsArticleRepository.AddNewsArticle(newsArticle);
         }
 
-        public void UpdateNewsArticle(NewsArticle newsArticle)
+        public void UpdateNewsArticle(NewsArticleDTO newsArticle)
         {
             newsArticleRepository.UpdateNewsArticle(newsArticle);
         }

@@ -22,6 +22,7 @@ namespace OdataAPI.Controllers
         }
 
         [EnableQuery]
+        [Authorize("AdminOnly")]
         public ActionResult<IEnumerable<SystemAccount>> Get()
         {
             var accounts = systemAccountService.GetSystemAccounts();

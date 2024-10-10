@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.OData;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OData.ModelBuilder;
-using OdataAPI.Controllers;
 using Repositories;
 using Services;
 using System.Text;
@@ -14,11 +13,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 var modelBuilder = new ODataConventionModelBuilder();
-//modelBuilder.EntityType<Category>();
-modelBuilder.EntityType<Order>();
-modelBuilder.EntitySet<Customer>("Customers");
 modelBuilder.EntitySet<SystemAccount>("SystemAccounts");
 modelBuilder.EntitySet<Category>("Categories");
+modelBuilder.EntitySet<NewsArticle>("NewsArticles");
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -35,12 +32,10 @@ builder.Services.AddControllers()
 builder.Services.AddScoped<ISystemAccountRepository, SystemAccountRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<INewsArticleRepository, NewsArticleRepository>();
-builder.Services.AddScoped<ITagRepository, TagRepository>();
 
 builder.Services.AddScoped<ISystemAccountService, SystemAccountService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<INewsArticleService, NewsArticleService>();
-builder.Services.AddScoped<ITagService, TagService>();
 
 IConfiguration configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -67,8 +62,6 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("StaffOnly", policy => policy.RequireClaim("Role", "1"));
     options.AddPolicy("LecturerOnly", policy => policy.RequireClaim("Role", "2"));
 });
-
-
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

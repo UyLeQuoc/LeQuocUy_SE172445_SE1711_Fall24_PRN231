@@ -8,6 +8,8 @@
 <h1>Edit Category</h1>
 
 <form method="post">
+    <input type="hidden" asp-for="Category.CategoryId" />
+
     <div class="form-group">
         <label asp-for="Category.CategoryName"></label>
         <input asp-for="Category.CategoryName" class="form-control" />

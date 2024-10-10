@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -6,65 +6,105 @@ using Services;
 
 namespace OdataAPI.Controllers
 {
-    [Route("odata/NewsArticles")]
-    public class NewsArticleController : ODataController
+    public class NewsArticlesController : ODataController
     {
         private readonly INewsArticleService newsArticleService;
 
-        public NewsArticleController(INewsArticleService service)
+        public NewsArticlesController(INewsArticleService service)
         {
-            this.newsArticleService = service;
+            newsArticleService = service;
         }
 
         [EnableQuery]
-        [HttpGet]
-        public ActionResult<IQueryable<NewsArticle>> Get()
+        public ActionResult<IEnumerable<NewsArticleDTO>> Get()
         {
-            var newsArticles = newsArticleService.GetNewsArticles().AsQueryable();
-            return Ok(newsArticles);
-        }
-
-        [EnableQuery]
-        [HttpGet("{id}")]
-        public ActionResult<NewsArticle> Get([FromRoute] string id)
-        {
-            var article = newsArticleService.GetNewsArticleById(id);
-            if (article == null)
+            try
             {
-                return NotFound();
+                var articles = newsArticleService.GetNewsArticles();
+                return Ok(articles);
             }
-            return Ok(article);
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [EnableQuery]
+        public ActionResult<NewsArticleDTO> Get([FromRoute] string key)
+        {
+            try
+            {
+                var article = newsArticleService.GetNewsArticleById(key);
+                if (article == null)
+                {
+                    return NotFound();
+                }
+                return Ok(article);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] NewsArticle newsArticle)
+        public IActionResult Post([FromBody] NewsArticleDTO newsArticleDTO)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
-            }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            newsArticleService.CreateNewsArticle(newsArticle);
-            return Created(newsArticle);
+                newsArticleService.CreateNewsArticle(newsArticleDTO);
+                return Created(newsArticleDTO);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        [HttpPut("{id}")]
-        public IActionResult Put([FromRoute] string id, [FromBody] NewsArticle newsArticle)
+        [HttpPut("/odata/NewsArticles/{id}")]
+        public IActionResult Put([FromRoute] string id, [FromBody] NewsArticleDTO newsArticleDTO)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
-            }
+                var existingArticle = newsArticleService.GetNewsArticleById(id);
+                if (existingArticle == null)
+                {
+                    return NotFound($"NewsArticle with ID {id} not found.");
+                }
 
-            newsArticleService.UpdateNewsArticle(newsArticle);
-            return NoContent();
+                newsArticleDTO.NewsArticleId = id;
+                newsArticleService.UpdateNewsArticle(newsArticleDTO);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("/odata/NewsArticles/{id}")]
         public IActionResult Delete([FromRoute] string id)
         {
-            newsArticleService.RemoveNewsArticle(id);
-            return NoContent();
+            try
+            {
+                var existingArticle = newsArticleService.GetNewsArticleById(id);
+                if (existingArticle == null)
+                {
+                    return NotFound($"NewsArticle with ID {id} not found.");
+                }
+
+                newsArticleService.RemoveNewsArticle(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

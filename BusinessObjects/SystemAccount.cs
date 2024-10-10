@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace BusinessObjects;
 
@@ -12,8 +13,8 @@ public partial class SystemAccount
     public string? AccountEmail { get; set; }
 
     public int? AccountRole { get; set; }
-
+    [JsonIgnore]
     public string? AccountPassword { get; set; }
 
-    //public virtual ICollection<NewsArticle> NewsArticles { get; set; } = new List<NewsArticle>();
+    public virtual ICollection<NewsArticle> NewsArticles { get; set; } = new List<NewsArticle>();
 }
