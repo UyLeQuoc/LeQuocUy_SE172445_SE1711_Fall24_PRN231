@@ -1,16 +1,17 @@
-﻿using DataAccessObjects;
+﻿using BusinessObjects;
+using DataAccessObjects;
 using DTO;
 
 namespace Repositories
 {
     public class NewsArticleRepository : INewsArticleRepository
     {
-        public List<NewsArticleDTO> GetNewsArticles()
+        public List<NewsArticle> GetNewsArticles()
         {
             return NewsArticleDAO.Instance.GetNewsArticles();
         }
 
-        public NewsArticleDTO GetNewsArticleById(string id)
+        public NewsArticle GetNewsArticleById(string id)
         {
             return NewsArticleDAO.Instance.GetNewsArticleById(id);
         }

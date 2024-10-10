@@ -1,41 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using BusinessObjects;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
 
 namespace RazorPagesFE.Pages.NewsArticlePage
 {
     public class DetailsModel : PageModel
     {
-        private readonly BusinessObjects.FunewsManagementFall2024Context _context;
-
-        public DetailsModel(BusinessObjects.FunewsManagementFall2024Context context)
-        {
-            _context = context;
-        }
-
-        public NewsArticle NewsArticle { get; set; } = default!;
+        public NewsArticle NewsArticle { get; set; }
+        public string Message { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var newsarticle = await _context.NewsArticles.FirstOrDefaultAsync(m => m.NewsArticleId == id);
-            if (newsarticle == null)
+            try
             {
-                return NotFound();
+                var token = HttpContext.Session.GetString("JWTToken");
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RedirectToPage("/NotAuthorized");
+                }
+
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/NewsArticles({id})?$expand=Category,CreatedBy");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        NewsArticle = JsonConvert.DeserializeObject<NewsArticle>(jsonString);
+                    }
+                    else
+                    {
+                        Message = "Failed to load the news article.";
+                        return Page();
+                    }
+                }
             }
-            else
+            catch (Exception e)
             {
-                NewsArticle = newsarticle;
+                Message = e.Message;
             }
+
             return Page();
         }
     }

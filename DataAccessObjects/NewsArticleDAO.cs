@@ -1,5 +1,6 @@
 ﻿using BusinessObjects;
 using DTO;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccessObjects
 {
@@ -25,44 +26,17 @@ namespace DataAccessObjects
             }
         }
 
-        public List<NewsArticleDTO> GetNewsArticles()
+        public List<NewsArticle> GetNewsArticles()
         {
-            return context.NewsArticles.Where(article => article.NewsStatus == true)
-                .Select(article => new NewsArticleDTO
-                {
-                    NewsArticleId = article.NewsArticleId,
-                    NewsTitle = article.NewsTitle,
-                    Headline = article.Headline,
-                    CreatedDate = article.CreatedDate,
-                    NewsContent = article.NewsContent,
-                    NewsSource = article.NewsSource,
-                    CategoryId = article.CategoryId,
-                    NewsStatus = article.NewsStatus,
-                    CreatedById = article.CreatedById,
-                    ModifiedDate = article.ModifiedDate,
-                    TagIds = article.Tags.Select(t => t.TagId).ToList()
-                }).OrderByDescending(article => article.CreatedDate).ToList();
+            return context.NewsArticles.Include(c => c.Category).Include(t => t.Tags).Include(r => r.CreatedBy).ToList();
         }
 
-        public NewsArticleDTO GetNewsArticleById(string id)
+        public NewsArticle GetNewsArticleById(string id)
         {
-            var article = context.NewsArticles.FirstOrDefault(na => na.NewsArticleId == id);
+            var article = context.NewsArticles.Include(c => c.Category).Include(t => t.Tags).Include(r => r.CreatedBy).FirstOrDefault(na => na.NewsArticleId == id);
             if (article != null)
             {
-                return new NewsArticleDTO
-                {
-                    NewsArticleId = article.NewsArticleId,
-                    NewsTitle = article.NewsTitle,
-                    Headline = article.Headline,
-                    CreatedDate = article.CreatedDate,
-                    NewsContent = article.NewsContent,
-                    NewsSource = article.NewsSource,
-                    CategoryId = article.CategoryId,
-                    NewsStatus = article.NewsStatus,
-                    CreatedById = article.CreatedById,
-                    ModifiedDate = article.ModifiedDate,
-                    TagIds = article.Tags.Select(t => t.TagId).ToList()
-                };
+                return article;
             }
             return null;
         }

@@ -9,13 +9,18 @@ namespace RazorPagesFE.Pages.NewsArticlePage
     public class IndexModel : PageModel
     {
         public List<NewsArticle> NewsArticles { get; set; } = new List<NewsArticle>();
+        public List<Tag> Tags { get; set; } = new List<Tag>();
         public string Message { get; set; } = string.Empty;
         public int TotalCount { get; set; }
         public int PageSize { get; set; } = 3;
         public int CurrentPage { get; set; } = 1;
 
+        // Search & Filter parameters
         [BindProperty(SupportsGet = true)]
         public string SearchTitle { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public int? SelectedTagId { get; set; }
 
         [BindProperty(SupportsGet = true)]
         public string SortBy { get; set; } = "NewsTitle";
@@ -35,11 +40,6 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                     return RedirectToPage("/NotAuthorized");
                 }
 
-                if (TempData["SuccessMessage"] != null)
-                {
-                    Message = TempData["SuccessMessage"].ToString();
-                }
-
                 using (var httpClient = new HttpClient())
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -51,6 +51,12 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                     if (!string.IsNullOrEmpty(SearchTitle))
                     {
                         query.Add($"$filter=contains(NewsTitle, '{SearchTitle}')");
+                    }
+
+                    // Filter by Tag
+                    if (SelectedTagId != null)
+                    {
+                        query.Add($"$filter=Tags/any(t: t/TagId eq {SelectedTagId})");
                     }
 
                     // Sorting
@@ -67,7 +73,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
 
                     // Build full OData query string
                     var queryString = string.Join("&", query);
-                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/NewsArticles?{queryString}&$expand=Category,CreatedBy");
+                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/NewsArticles?{queryString}&$expand=Category,CreatedBy,Tags");
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -80,6 +86,14 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                     else
                     {
                         NewsArticles = new List<NewsArticle>();
+                    }
+
+                    // Load Tags for filtering options
+                    var tagResponse = await httpClient.GetAsync($"http://localhost:5178/odata/Tags");
+                    if (tagResponse.IsSuccessStatusCode)
+                    {
+                        var tagJsonString = await tagResponse.Content.ReadAsStringAsync();
+                        Tags = JsonConvert.DeserializeObject<ODataResponse<Tag>>(tagJsonString).Value;
                     }
                 }
 

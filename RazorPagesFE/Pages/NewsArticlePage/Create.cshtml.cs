@@ -1,45 +1,109 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using BusinessObjects;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace RazorPagesFE.Pages.NewsArticlePage
 {
     public class CreateModel : PageModel
     {
-        private readonly BusinessObjects.FunewsManagementFall2024Context _context;
-
-        public CreateModel(BusinessObjects.FunewsManagementFall2024Context context)
-        {
-            _context = context;
-        }
-
-        public IActionResult OnGet()
-        {
-        ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryDesciption");
-        ViewData["CreatedById"] = new SelectList(_context.SystemAccounts, "AccountId", "AccountId");
-            return Page();
-        }
+        [BindProperty]
+        public NewsArticle NewsArticle { get; set; } = new NewsArticle();
 
         [BindProperty]
-        public NewsArticle NewsArticle { get; set; } = default!;
+        public List<int> SelectedTagIds { get; set; } = new List<int>();
 
-        // For more information, see https://aka.ms/RazorPagesCRUD.
+        public List<Category> Categories { get; set; } = new List<Category>();
+        public List<Tag> Tags { get; set; } = new List<Tag>();
+
+        public string Message { get; set; }
+
+        public async Task<IActionResult> OnGetAsync()
+        {
+            try
+            {
+                var token = HttpContext.Session.GetString("JWTToken");
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RedirectToPage("/NotAuthorized");
+                }
+
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    // Fetch Categories
+                    var response = await httpClient.GetAsync("http://localhost:5178/odata/Categories?$filter=IsActive eq true");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<Category>>(jsonString);
+                        Categories = odataResponse.Value;
+                    }
+
+                    // Fetch Tags
+                    response = await httpClient.GetAsync("http://localhost:5178/odata/Tags");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        Tags = JsonConvert.DeserializeObject<ODataResponse<Tag>>(jsonString).Value;
+                    }
+                }
+
+                return Page();
+            }
+            catch (Exception e)
+            {
+                Message = e.Message;
+                return Page();
+            }
+        }
+
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
-                return Page();
+                return await OnGetAsync();
             }
 
-            _context.NewsArticles.Add(NewsArticle);
-            await _context.SaveChangesAsync();
+            try
+            {
+                var token = HttpContext.Session.GetString("JWTToken");
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RedirectToPage("/NotAuthorized");
+                }
 
-            return RedirectToPage("./Index");
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    NewsArticle.Tags = SelectedTagIds.Select(tagId => new Tag { TagId = tagId }).ToList();
+
+                    var jsonContent = JsonConvert.SerializeObject(NewsArticle);
+                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                    var response = await httpClient.PostAsync("http://localhost:5178/odata/NewsArticles", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        TempData["SuccessMessage"] = "News Article created successfully!";
+                        return RedirectToPage("./Index");
+                    }
+                    else
+                    {
+                        Message = "Failed to create news article.";
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Message = e.Message;
+            }
+
+            return Page();
         }
     }
 }

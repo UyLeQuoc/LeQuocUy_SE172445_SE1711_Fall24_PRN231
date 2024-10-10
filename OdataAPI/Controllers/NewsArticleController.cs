@@ -1,4 +1,5 @@
-﻿using DTO;
+﻿using BusinessObjects;
+using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -16,7 +17,7 @@ namespace OdataAPI.Controllers
         }
 
         [EnableQuery]
-        public ActionResult<IEnumerable<NewsArticleDTO>> Get()
+        public ActionResult<IEnumerable<NewsArticle>> Get()
         {
             try
             {
@@ -30,7 +31,7 @@ namespace OdataAPI.Controllers
         }
 
         [EnableQuery]
-        public ActionResult<NewsArticleDTO> Get([FromRoute] string key)
+        public ActionResult<NewsArticle> Get([FromRoute] string key)
         {
             try
             {

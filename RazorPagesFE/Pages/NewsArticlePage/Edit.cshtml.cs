@@ -1,78 +1,128 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BusinessObjects;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using BusinessObjects;
+using Newtonsoft.Json;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace RazorPagesFE.Pages.NewsArticlePage
 {
     public class EditModel : PageModel
     {
-        private readonly BusinessObjects.FunewsManagementFall2024Context _context;
-
-        public EditModel(BusinessObjects.FunewsManagementFall2024Context context)
-        {
-            _context = context;
-        }
+        [BindProperty]
+        public NewsArticle NewsArticle { get; set; }
 
         [BindProperty]
-        public NewsArticle NewsArticle { get; set; } = default!;
+        public List<int> SelectedTagIds { get; set; } = new List<int>();
+
+        public List<Category> Categories { get; set; } = new List<Category>();
+        public List<Tag> Tags { get; set; } = new List<Tag>();
+
+        public string Message { get; set; } = string.Empty;
 
         public async Task<IActionResult> OnGetAsync(string id)
         {
-            if (id == null)
+            if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
             }
 
-            var newsarticle =  await _context.NewsArticles.FirstOrDefaultAsync(m => m.NewsArticleId == id);
-            if (newsarticle == null)
+            try
             {
-                return NotFound();
+                var token = HttpContext.Session.GetString("JWTToken");
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RedirectToPage("/NotAuthorized");
+                }
+
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    // Fetch categories
+                    var response = await httpClient.GetAsync("http://localhost:5178/odata/Categories?$filter=IsActive eq true");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<Category>>(jsonString);
+                        Categories = odataResponse.Value;
+                    }
+
+                    // Fetch Tags
+                    response = await httpClient.GetAsync("http://localhost:5178/odata/Tags");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        Tags = JsonConvert.DeserializeObject<ODataResponse<Tag>>(jsonString).Value;
+                    }
+
+                    // Fetch news article details
+                    response = await httpClient.GetAsync($"http://localhost:5178/odata/NewsArticles({id})?$expand=Tags");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        NewsArticle = JsonConvert.DeserializeObject<NewsArticle>(jsonString);
+
+                        SelectedTagIds = NewsArticle.Tags.Select(t => t.TagId).ToList();
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
+
+                return Page();
             }
-            NewsArticle = newsarticle;
-           ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryDesciption");
-           ViewData["CreatedById"] = new SelectList(_context.SystemAccounts, "AccountId", "AccountId");
-            return Page();
+            catch (Exception e)
+            {
+                Message = e.Message;
+                return Page();
+            }
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
-                return Page();
+                return await OnGetAsync(NewsArticle.NewsArticleId);
             }
-
-            _context.Attach(NewsArticle).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                var token = HttpContext.Session.GetString("JWTToken");
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RedirectToPage("/NotAuthorized");
+                }
+
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    NewsArticle.Tags = SelectedTagIds.Select(tagId => new Tag { TagId = tagId }).ToList();
+
+                    var jsonContent = JsonConvert.SerializeObject(NewsArticle);
+                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                    var response = await httpClient.PutAsync($"http://localhost:5178/odata/NewsArticles/{NewsArticle.NewsArticleId}", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        TempData["SuccessMessage"] = "News Article updated successfully!";
+                        return RedirectToPage("./Index");
+                    }
+                    else
+                    {
+                        Message = "Failed to update news article.";
+                    }
+                }
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception e)
             {
-                if (!NewsArticleExists(NewsArticle.NewsArticleId))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                Message = e.Message;
             }
 
-            return RedirectToPage("./Index");
-        }
-
-        private bool NewsArticleExists(string id)
-        {
-            return _context.NewsArticles.Any(e => e.NewsArticleId == id);
+            return Page();
         }
     }
 }
