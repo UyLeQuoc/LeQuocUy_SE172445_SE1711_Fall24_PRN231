@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
-using System.Text;
 
 namespace RazorPagesFE.Pages.CategoryPage
 {
@@ -12,7 +11,9 @@ namespace RazorPagesFE.Pages.CategoryPage
         [BindProperty]
         public Category Category { get; set; }
 
-        public string Message { get; set; }
+        public List<Category> ParentCategories { get; set; } = new List<Category>();
+
+        public string Message { get; set; } = string.Empty;
 
         public async Task<IActionResult> OnGetAsync(short? id)
         {
@@ -33,8 +34,15 @@ namespace RazorPagesFE.Pages.CategoryPage
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/Categories({id})");
+                    var response = await httpClient.GetAsync("http://localhost:5178/odata/Categories?$filter=IsActive eq true");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var jsonString = await response.Content.ReadAsStringAsync();
+                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<Category>>(jsonString);
+                        ParentCategories = odataResponse.Value;
+                    }
 
+                    response = await httpClient.GetAsync($"http://localhost:5178/odata/Categories({id})");
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
@@ -42,17 +50,16 @@ namespace RazorPagesFE.Pages.CategoryPage
                     }
                     else
                     {
-                        Message = "Failed to load category data.";
+                        return NotFound();
                     }
                 }
-
-                return Page();
             }
             catch (Exception e)
             {
                 Message = e.Message;
-                return Page();
             }
+
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -75,9 +82,9 @@ namespace RazorPagesFE.Pages.CategoryPage
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
                     var jsonContent = JsonConvert.SerializeObject(Category);
-                    var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+                    var content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
-                    var response = await httpClient.PutAsync($"http://localhost:5178/odata/Categories({Category.CategoryId})", content);
+                    var response = await httpClient.PutAsync($"http://localhost:5178/odata/Categories/{Category.CategoryId}", content);
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -86,17 +93,18 @@ namespace RazorPagesFE.Pages.CategoryPage
                     }
                     else
                     {
-                        Message = "Failed to update category.";
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+                        throw new Exception(errorResponse.Error.Message);
                     }
                 }
-
-                return Page();
             }
             catch (Exception e)
             {
                 Message = e.Message;
-                return Page();
             }
+
+            return Page();
         }
     }
 }

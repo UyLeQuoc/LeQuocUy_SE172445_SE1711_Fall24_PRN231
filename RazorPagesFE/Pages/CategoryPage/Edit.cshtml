@@ -31,10 +31,18 @@
 
     <div class="form-group">
         <label asp-for="Category.ParentCategoryId"></label>
-        <input asp-for="Category.ParentCategoryId" class="form-control" />
+        <select asp-for="Category.ParentCategoryId" class="form-control">
+            <option value="">-- None --</option>
+            @foreach (var parent in Model.ParentCategories)
+            {
+                <option value="@parent.CategoryId" selected=@(parent.CategoryId == Model.Category.ParentCategoryId ? true : false)>
+                    @parent.CategoryName
+                </option>
+            }
+        </select>
         <span asp-validation-for="Category.ParentCategoryId" class="text-danger"></span>
     </div>
 
-    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <button type="submit" class="btn btn-primary">Save</button>
     <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
 </form>

@@ -68,7 +68,7 @@ namespace RazorPagesFE.Pages.CategoryPage
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                    var response = await httpClient.DeleteAsync($"http://localhost:5178/odata/Categories({id})");
+                    var response = await httpClient.DeleteAsync($"http://localhost:5178/odata/Categories/{id}");
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -77,7 +77,9 @@ namespace RazorPagesFE.Pages.CategoryPage
                     }
                     else
                     {
-                        Message = "Failed to delete category.";
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+                        throw new Exception(errorResponse.Error.Message);
                     }
                 }
 

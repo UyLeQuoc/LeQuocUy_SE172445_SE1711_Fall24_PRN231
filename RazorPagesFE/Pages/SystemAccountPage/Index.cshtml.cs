@@ -99,14 +99,5 @@ namespace RazorPagesFE.Pages.SystemAccountPage
                 return Page();
             }
         }
-
-        public class ODataResponse<T>
-        {
-            [JsonProperty("value")]
-            public List<T> Value { get; set; }
-
-            [JsonProperty("@odata.count")]
-            public int Count { get; set; }
-        }
     }
 }

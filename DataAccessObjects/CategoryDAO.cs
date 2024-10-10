@@ -39,14 +39,11 @@ namespace DataAccessObjects
             try
             {
                 var categories = GetCategories();
-                short maxId = categories.Max(c => c.CategoryId);
 
                 if (categories.Any(c => c.CategoryName == category.CategoryName))
                 {
                     throw new InvalidOperationException("Category name already exists.");
                 }
-
-                category.CategoryId = (short)(maxId + 1);
 
                 context.Categories.Add(category);
                 context.SaveChanges();

@@ -36,13 +36,20 @@ namespace OdataAPI.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] Category category)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
-            }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            categoryService.CreateCategory(category);
-            return Created(category);
+                categoryService.CreateCategory(category);
+                return Created(category);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpPut("/odata/Categories/{id}")]

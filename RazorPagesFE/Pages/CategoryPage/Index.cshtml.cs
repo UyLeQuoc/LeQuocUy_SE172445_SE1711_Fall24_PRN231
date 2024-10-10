@@ -68,7 +68,7 @@ namespace RazorPagesFE.Pages.CategoryPage
 
                     // Build full OData query string
                     var queryString = string.Join("&", query);
-                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/Categories?{queryString}");
+                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/Categories?{queryString}&$expand=ParentCategory");
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -91,15 +91,6 @@ namespace RazorPagesFE.Pages.CategoryPage
                 Message = e.Message;
                 return Page();
             }
-        }
-
-        public class ODataResponse<T>
-        {
-            [JsonProperty("value")]
-            public List<T> Value { get; set; }
-
-            [JsonProperty("@odata.count")]
-            public int Count { get; set; }
         }
     }
 }

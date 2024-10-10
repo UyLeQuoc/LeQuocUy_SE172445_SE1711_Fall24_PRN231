@@ -31,7 +31,7 @@ namespace RazorPagesFE.Pages.CategoryPage
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/Categories({id})");
+                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/Categories({id})?$expand=ParentCategory");
 
                     if (response.IsSuccessStatusCode)
                     {
