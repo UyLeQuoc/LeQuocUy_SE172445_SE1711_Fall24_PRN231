@@ -85,7 +85,7 @@ namespace RazorPagesFE.Pages.Profile
                     if (response.IsSuccessStatusCode)
                     {
                         TempData["SuccessMessage"] = "Profile updated successfully!";
-                        return RedirectToPage("/Profile/Index");
+                        return RedirectToPage("/Index");
                     }
                     else
                     {

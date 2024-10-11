@@ -8,6 +8,7 @@
 <h1>Profile</h1>
 
 <form method="post">
+    <input type="hidden" asp-for="SystemAccount.AccountId" />
     <div class="form-group">
         <label asp-for="SystemAccount.AccountName"></label>
         <input asp-for="SystemAccount.AccountName" class="form-control" />
@@ -17,6 +18,7 @@
     <div class="form-group">
         <label asp-for="SystemAccount.AccountEmail"></label>
         <input asp-for="SystemAccount.AccountEmail" class="form-control" disabled />
+        <input type="hidden" asp-for="SystemAccount.AccountEmail" />
     </div>
 
     <div class="form-group">
@@ -28,6 +30,7 @@
     <div class="form-group">
         <label asp-for="SystemAccount.AccountRole"></label>
         <input asp-for="SystemAccount.AccountRole" class="form-control" disabled />
+        <input type="hidden" asp-for="SystemAccount.AccountRole" />
     </div>
 
     <button type="submit" class="btn btn-primary">Update Profile</button>

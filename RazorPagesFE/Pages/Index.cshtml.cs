@@ -11,16 +11,15 @@ namespace RazorPagesFE.Pages
         public string Email { get; set; }
         public string Role { get; set; }
         public string AccountId { get; set; }
+        public string Message { get; set; } = string.Empty;
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
-            // Lấy JWT token từ session
             var token = HttpContext.Session.GetString("JWTToken");
 
             if (string.IsNullOrEmpty(token))
             {
-                // Nếu không có token, chuyển hướng đến trang login
-                RedirectToPage("/Login");
+                return RedirectToPage("/Login");
             }
 
             using (var httpClient = new HttpClient())
@@ -45,6 +44,8 @@ namespace RazorPagesFE.Pages
                     };
                     AccountId = currentUser.AccountId;
                 }
+
+                return Page();
             }
         }
 
@@ -57,12 +58,10 @@ namespace RazorPagesFE.Pages
 
         public async Task<IActionResult> OnPostLogoutAsync()
         {
-            // Xóa token khỏi session
             HttpContext.Session.Remove("JWTToken");
             HttpContext.Session.Remove("Role");
             HttpContext.Session.Remove("AccountId");
 
-            // Chuyển hướng đến trang login
             return RedirectToPage("/Login");
         }
 

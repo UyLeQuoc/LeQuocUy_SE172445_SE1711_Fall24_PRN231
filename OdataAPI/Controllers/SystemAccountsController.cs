@@ -57,6 +57,7 @@ namespace OdataAPI.Controllers
         {
             try
             {
+                systemAccount.AccountId = id;
                 systemAccountService.UpdateSystemAccount(systemAccount);
                 return Ok();
             }

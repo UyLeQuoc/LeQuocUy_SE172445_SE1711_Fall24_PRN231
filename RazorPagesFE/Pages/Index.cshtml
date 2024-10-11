@@ -9,6 +9,13 @@
 <p>Your role: @Model.Role</p>
 <p>Your account ID: @Model.AccountId</p>
 
+@if (Model.Message.Length != 0)
+{
+    <div class="alert alert-info" role="alert">
+        @Model.Message
+    </div>
+}
+
 <form method="post" asp-page-handler="Logout">
     <button type="submit">Logout</button>
 </form>
