@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -48,7 +49,6 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                         Categories = odataResponse.Value;
                     }
 
-                    // Fetch tags
                     response = await httpClient.GetAsync("http://localhost:5178/odata/Tags");
                     if (response.IsSuccessStatusCode)
                     {
@@ -56,14 +56,12 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                         Tags = JsonConvert.DeserializeObject<ODataResponse<Tag>>(jsonString).Value;
                     }
 
-                    // Fetch the news article details
                     response = await httpClient.GetAsync($"http://localhost:5178/odata/NewsArticles/{id}?$expand=Tags");
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
                         NewsArticle = JsonConvert.DeserializeObject<NewsArticle>(jsonString);
 
-                        // Pre-select the existing tags
                         SelectedTagIds = NewsArticle.Tags.Select(t => t.TagId).ToList();
                     }
                     else
@@ -100,14 +98,25 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                    // Set the selected tags to the news article
                     NewsArticle.Tags = SelectedTagIds.Select(tagId => new Tag { TagId = tagId }).ToList();
+                    var newsArticleDTO = new NewsArticleDTO
+                    {
+                        NewsArticleId = NewsArticle.NewsArticleId,
+                        NewsTitle = NewsArticle.NewsTitle,
+                        Headline = NewsArticle.Headline,
+                        NewsContent = NewsArticle.NewsContent,
+                        CreatedDate = NewsArticle.CreatedDate,
+                        NewsSource = NewsArticle.NewsSource,
+                        CategoryId = NewsArticle.CategoryId,
+                        CreatedById = NewsArticle.CreatedById,
+                        NewsStatus = NewsArticle.NewsStatus,
+                        ModifiedDate = NewsArticle.ModifiedDate,
+                        TagIds = SelectedTagIds
+                    };
 
-                    // Serialize the updated article
-                    var jsonContent = JsonConvert.SerializeObject(NewsArticle);
+                    var jsonContent = JsonConvert.SerializeObject(newsArticleDTO);
                     var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                    // Send PUT request to update the article
                     var response = await httpClient.PutAsync($"http://localhost:5178/odata/NewsArticles/{NewsArticle.NewsArticleId}", content);
 
                     if (response.IsSuccessStatusCode)

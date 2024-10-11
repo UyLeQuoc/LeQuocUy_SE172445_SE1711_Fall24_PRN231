@@ -8,10 +8,16 @@ namespace RazorPagesFE.Pages.TagPage
     public class IndexModel : PageModel
     {
         public List<Tag> Tags { get; set; } = new List<Tag>();
+        public string Message { get; set; } = string.Empty;
 
         public async Task OnGetAsync()
         {
             var token = HttpContext.Session.GetString("JWTToken");
+            if (TempData["SuccessMessage"] != null)
+            {
+                Message = TempData["SuccessMessage"].ToString();
+            }
+
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);

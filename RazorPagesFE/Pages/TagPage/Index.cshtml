@@ -11,6 +11,13 @@
     <a asp-page="Create" class="btn btn-primary">Create New Tag</a>
 </p>
 
+@if (Model.Message.Length != 0)
+{
+    <div class="alert alert-info" role="alert">
+        @Model.Message
+    </div>
+}
+
 <table class="table">
     <thead>
         <tr>

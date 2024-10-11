@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -16,6 +17,7 @@ namespace OdataAPI.Controllers
         }
 
         [EnableQuery]
+        [Authorize("StaffOnly")]
         public ActionResult<List<Tag>> Get()
         {
             try
@@ -30,6 +32,7 @@ namespace OdataAPI.Controllers
         }
 
         [EnableQuery]
+        [Authorize("StaffOnly")]
         public ActionResult<Tag> Get([FromRoute] int key)
         {
             try
@@ -46,7 +49,7 @@ namespace OdataAPI.Controllers
                 return BadRequest(e.Message);
             }
         }
-
+        [Authorize("StaffOnly")]
         [HttpPost]
         public IActionResult Post([FromBody] Tag tag)
         {
@@ -65,7 +68,7 @@ namespace OdataAPI.Controllers
                 return BadRequest(e.Message);
             }
         }
-
+        [Authorize("StaffOnly")]
         [HttpPut("/odata/Tags/{id}")]
         public IActionResult Put([FromRoute] int id, [FromBody] Tag tag)
         {
@@ -84,7 +87,7 @@ namespace OdataAPI.Controllers
                 return BadRequest(e.Message);
             }
         }
-
+        [Authorize("StaffOnly")]
         [HttpDelete("/odata/Tags/{id}")]
         public IActionResult Delete([FromRoute] int id)
         {

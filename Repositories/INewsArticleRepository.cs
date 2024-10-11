@@ -7,7 +7,7 @@ namespace Repositories
     {
         List<NewsArticle> GetNewsArticles();
         NewsArticle GetNewsArticleById(string id);
-        void AddNewsArticle(NewsArticle newsArticle);
+        void AddNewsArticle(NewsArticleDTO newsArticle);
         void UpdateNewsArticle(NewsArticleDTO newsArticle);
         void DeleteNewsArticle(string id);
     }

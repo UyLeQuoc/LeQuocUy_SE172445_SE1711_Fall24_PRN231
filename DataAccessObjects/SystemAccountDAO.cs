@@ -53,7 +53,6 @@ namespace DataAccessObjects
                 var accounts = GetSystemAccounts();
                 short maxId = accounts.Max(a => a.AccountId);
 
-                //Check exist email
                 if (accounts.Any(a => a.AccountEmail == systemAccount.AccountEmail))
                 {
                     throw new InvalidOperationException("Email already exists.");

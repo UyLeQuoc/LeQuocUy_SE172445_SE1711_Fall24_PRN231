@@ -1,5 +1,6 @@
 ﻿using BusinessObjects;
 using DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -48,25 +49,29 @@ namespace OdataAPI.Controllers
             }
         }
 
+        [Authorize("StaffOnly")]
         [HttpPost]
-        public IActionResult Post([FromBody] NewsArticle newsArticle)
+        public async Task<IActionResult> Post([FromBody] NewsArticleDTO newsArticle)
         {
             try
             {
-                if (!ModelState.IsValid)
+                var accountId = User.FindFirst("AccountId");
+                if (accountId == null)
                 {
-                    return BadRequest(ModelState);
+                    throw new Exception("AccountId claim is missing in the token.");
                 }
 
+                short createdById = short.Parse(accountId.Value);
+                newsArticle.CreatedById = createdById;
                 newsArticleService.CreateNewsArticle(newsArticle);
-                return Created(newsArticle);
+                return Ok(newsArticle);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
-
+        [Authorize("StaffOnly")]
         [HttpPut("/odata/NewsArticles/{id}")]
         public IActionResult Put([FromRoute] string id, [FromBody] NewsArticleDTO newsArticleDTO)
         {
@@ -79,6 +84,15 @@ namespace OdataAPI.Controllers
                 }
 
                 newsArticleDTO.NewsArticleId = id;
+                var accountId = User.FindFirst("AccountId");
+                if (accountId == null)
+                {
+                    throw new Exception("AccountId claim is missing in the token.");
+                }
+
+                short updatedById = short.Parse(accountId.Value);
+                newsArticleDTO.UpdatedById = updatedById;
+
                 newsArticleService.UpdateNewsArticle(newsArticleDTO);
                 return Ok();
             }
@@ -87,7 +101,7 @@ namespace OdataAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        [Authorize("StaffOnly")]
         [HttpDelete("/odata/NewsArticles/{id}")]
         public IActionResult Delete([FromRoute] string id)
         {

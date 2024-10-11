@@ -41,11 +41,27 @@ namespace DataAccessObjects
             return null;
         }
 
-        public void AddNewsArticle(NewsArticle newsArticle)
+        public void AddNewsArticle(NewsArticleDTO newsArticleDTO)
         {
             try
             {
-                context.NewsArticles.Add(newsArticle);
+                var newArticle = new NewsArticle
+                {
+                    NewsArticleId = newsArticleDTO.NewsArticleId,
+                    NewsTitle = newsArticleDTO.NewsTitle,
+                    Headline = newsArticleDTO.Headline,
+                    NewsContent = newsArticleDTO.NewsContent,
+                    NewsSource = newsArticleDTO.NewsSource,
+                    CategoryId = newsArticleDTO.CategoryId,
+                    NewsStatus = newsArticleDTO.NewsStatus,
+                    CreatedById = newsArticleDTO.CreatedById,
+                    CreatedDate = DateTime.Now,
+                    Tags = context.Tags.Where(t => newsArticleDTO.TagIds.Contains(t.TagId)).ToList()
+                };
+                var maxId = context.NewsArticles.Max(na => na.NewsArticleId);
+                newArticle.NewsArticleId = (int.Parse(maxId) + 1).ToString();
+
+                context.NewsArticles.Add(newArticle);
                 context.SaveChanges();
             }
             catch (Exception e)
@@ -64,6 +80,7 @@ namespace DataAccessObjects
                 existingArticle.NewsContent = newsArticleDTO.NewsContent;
                 existingArticle.CategoryId = newsArticleDTO.CategoryId;
                 existingArticle.NewsStatus = newsArticleDTO.NewsStatus;
+                existingArticle.UpdatedById = newsArticleDTO.UpdatedById;
                 existingArticle.ModifiedDate = DateTime.Now;
 
                 existingArticle.Tags = context.Tags.Where(t => newsArticleDTO.TagIds.Contains(t.TagId)).ToList();
@@ -76,6 +93,7 @@ namespace DataAccessObjects
             var newsArticle = context.NewsArticles.FirstOrDefault(na => na.NewsArticleId == id);
             if (newsArticle != null)
             {
+                newsArticle.Tags.Clear();
                 context.NewsArticles.Remove(newsArticle);
                 context.SaveChanges();
             }

@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -82,7 +83,23 @@ namespace RazorPagesFE.Pages.NewsArticlePage
 
                     NewsArticle.Tags = SelectedTagIds.Select(tagId => new Tag { TagId = tagId }).ToList();
 
-                    var jsonContent = JsonConvert.SerializeObject(NewsArticle);
+                    var newsArticleDTO = new NewsArticleDTO
+                    {
+                        NewsArticleId = NewsArticle.NewsArticleId,
+                        NewsTitle = NewsArticle.NewsTitle,
+                        Headline = NewsArticle.Headline,
+                        NewsContent = NewsArticle.NewsContent,
+                        CreatedDate = NewsArticle.CreatedDate,
+                        NewsSource = NewsArticle.NewsSource,
+                        CategoryId = NewsArticle.CategoryId,
+                        CreatedById = NewsArticle.CreatedById,
+                        NewsStatus = NewsArticle.NewsStatus,
+                        ModifiedDate = NewsArticle.ModifiedDate,
+                        TagIds = SelectedTagIds
+                    };
+
+                    var jsonContent = JsonConvert.SerializeObject(newsArticleDTO);
+
                     var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
                     var response = await httpClient.PostAsync("http://localhost:5178/odata/NewsArticles", content);

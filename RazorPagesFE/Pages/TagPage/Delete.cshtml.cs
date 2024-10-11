@@ -17,7 +17,7 @@ namespace RazorPagesFE.Pages.TagPage
             using (var httpClient = new HttpClient())
             {
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await httpClient.GetAsync($"http://localhost:5178/odata/Tags({id})");
+                var response = await httpClient.GetAsync($"http://localhost:5178/odata/Tags/{id}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -35,21 +35,30 @@ namespace RazorPagesFE.Pages.TagPage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var token = HttpContext.Session.GetString("JWTToken");
-            using (var httpClient = new HttpClient())
+            try
             {
-                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await httpClient.DeleteAsync($"http://localhost:5178/odata/Tags/{Tag.TagId}");
+                var token = HttpContext.Session.GetString("JWTToken");
+                using (var httpClient = new HttpClient())
+                {
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    var response = await httpClient.DeleteAsync($"http://localhost:5178/odata/Tags/{Tag.TagId}");
 
-                if (response.IsSuccessStatusCode)
-                {
-                    return RedirectToPage("./Index");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToPage("./Index");
+                    }
+                    else
+                    {
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+                        throw new Exception(errorResponse.Error.Message);
+                    }
                 }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Failed to delete tag.");
-                    return Page();
-                }
+            }
+            catch (Exception e)
+            {
+                TempData["SuccessMessage"] = e.Message;
+                return RedirectToPage("./Index");
             }
         }
     }

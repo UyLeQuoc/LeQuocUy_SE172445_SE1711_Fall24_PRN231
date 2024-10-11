@@ -31,6 +31,7 @@ namespace RazorPagesFE.Pages.TagPage
 
                 if (response.IsSuccessStatusCode)
                 {
+                    TempData["SuccessMessage"] = "Create Successful";
                     return RedirectToPage("./Index");
                 }
                 else

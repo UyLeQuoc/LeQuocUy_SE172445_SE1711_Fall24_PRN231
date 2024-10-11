@@ -41,7 +41,9 @@ namespace RazorPagesFE.Pages.CategoryPage
                     }
                     else
                     {
-                        Message = "Failed to load category data.";
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+                        throw new Exception(errorResponse.Error.Message);
                     }
                 }
 
@@ -49,8 +51,8 @@ namespace RazorPagesFE.Pages.CategoryPage
             }
             catch (Exception e)
             {
-                Message = e.Message;
-                return Page();
+                TempData["SuccessMessage"] = e.Message;
+                return RedirectToPage("./Index");
             }
         }
 
@@ -82,13 +84,11 @@ namespace RazorPagesFE.Pages.CategoryPage
                         throw new Exception(errorResponse.Error.Message);
                     }
                 }
-
-                return Page();
             }
             catch (Exception e)
             {
-                Message = e.Message;
-                return Page();
+                TempData["SuccessMessage"] = e.Message;
+                return RedirectToPage("./Index");
             }
         }
     }

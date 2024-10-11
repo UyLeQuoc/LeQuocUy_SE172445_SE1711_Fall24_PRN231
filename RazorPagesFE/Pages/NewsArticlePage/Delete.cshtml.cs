@@ -31,7 +31,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/NewsArticles({id})");
+                    var response = await httpClient.GetAsync($"http://localhost:5178/odata/NewsArticles/{id}");
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
@@ -39,6 +39,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                     }
                     else
                     {
+                        Message = "Failed to retrieve news article.";
                         return NotFound();
                     }
                 }
@@ -47,7 +48,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
             }
             catch (Exception e)
             {
-                Message = e.Message;
+                Message = $"Error: {e.Message}";
                 return Page();
             }
         }
@@ -66,7 +67,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                    var response = await httpClient.DeleteAsync($"http://localhost:5178/odata/NewsArticles({id})");
+                    var response = await httpClient.DeleteAsync($"http://localhost:5178/odata/NewsArticles/{id}");
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -75,13 +76,17 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                     }
                     else
                     {
-                        Message = "Failed to delete news article.";
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+                        throw new Exception(errorResponse.Error.Message);
                     }
                 }
             }
             catch (Exception e)
             {
-                Message = e.Message;
+                Message = $"Error: {e.Message}";
+                TempData["SuccessMessage"] = Message;
+                return RedirectToPage("./Index");
             }
 
             return Page();

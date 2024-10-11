@@ -14,7 +14,6 @@ namespace RazorPagesFE.Pages.CategoryPage
         public int PageSize { get; set; } = 3;
         public int CurrentPage { get; set; } = 1;
 
-        // Search & Filter parameters
         [BindProperty(SupportsGet = true)]
         public string SearchName { get; set; }
 
@@ -45,28 +44,22 @@ namespace RazorPagesFE.Pages.CategoryPage
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                    // Construct OData query with filters, sorting, and paging
                     var query = new List<string>();
 
-                    // Search by Category Name
                     if (!string.IsNullOrEmpty(SearchName))
                     {
                         query.Add($"$filter=contains(CategoryName, '{SearchName}')");
                     }
 
-                    // Sorting
                     var order = Ascending ? "asc" : "desc";
                     query.Add($"$orderby={SortBy} {order}");
 
-                    // Paging
                     var skip = (CurrentPage - 1) * PageSize;
                     query.Add($"$top={PageSize}");
                     query.Add($"$skip={skip}");
 
-                    // Count total records
                     query.Add("$count=true");
 
-                    // Build full OData query string
                     var queryString = string.Join("&", query);
                     var response = await httpClient.GetAsync($"http://localhost:5178/odata/Categories?{queryString}&$expand=ParentCategory");
 

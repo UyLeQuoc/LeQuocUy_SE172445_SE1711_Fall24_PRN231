@@ -23,10 +23,10 @@ namespace RazorPagesFE.Pages.NewsArticlePage
         public int? SelectedTagId { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public string SortBy { get; set; } = "NewsTitle";
+        public string SortBy { get; set; } = "CreatedDate";
 
         [BindProperty(SupportsGet = true)]
-        public bool Ascending { get; set; } = true;
+        public bool Ascending { get; set; } = false;
 
         public async Task<IActionResult> OnGetAsync(int currentPage = 1)
         {
@@ -38,6 +38,11 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                 if (string.IsNullOrEmpty(token))
                 {
                     return RedirectToPage("/NotAuthorized");
+                }
+
+                if (TempData["SuccessMessage"] != null)
+                {
+                    Message = TempData["SuccessMessage"].ToString();
                 }
 
                 using (var httpClient = new HttpClient())

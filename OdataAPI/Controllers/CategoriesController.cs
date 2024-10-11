@@ -1,4 +1,5 @@
 ﻿using BusinessObjects;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
@@ -16,6 +17,7 @@ namespace OdataAPI.Controllers
         }
 
         [EnableQuery]
+        [Authorize("StaffOnly")]
         public ActionResult<IEnumerable<Category>> Get()
         {
             var categories = categoryService.GetCategories();
@@ -23,6 +25,7 @@ namespace OdataAPI.Controllers
         }
 
         [EnableQuery]
+        [Authorize("StaffOnly")]
         public ActionResult<Category> Get([FromRoute] short key)
         {
             var category = categoryService.GetCategoryById(key);
@@ -33,6 +36,7 @@ namespace OdataAPI.Controllers
             return Ok(category);
         }
 
+        [Authorize("StaffOnly")]
         [HttpPost]
         public IActionResult Post([FromBody] Category category)
         {
@@ -52,6 +56,7 @@ namespace OdataAPI.Controllers
             }
         }
 
+        [Authorize("StaffOnly")]
         [HttpPut("/odata/Categories/{id}")]
         public IActionResult Put([FromRoute] short id, [FromBody] Category category)
         {
@@ -66,6 +71,7 @@ namespace OdataAPI.Controllers
             }
         }
 
+        [Authorize("StaffOnly")]
         [HttpDelete("/odata/Categories/{id}")]
         public IActionResult Delete([FromRoute] short id)
         {

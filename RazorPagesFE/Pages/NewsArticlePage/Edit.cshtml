@@ -8,6 +8,7 @@
 <h1>Edit News Article</h1>
 
 <form method="post">
+    <input type="hidden" asp-for="NewsArticle.NewsArticleId" />
     <div class="form-group">
         <label asp-for="NewsArticle.NewsTitle"></label>
         <input asp-for="NewsArticle.NewsTitle" class="form-control" />

@@ -94,7 +94,6 @@ namespace OdataAPI.Controllers
             {
                 return Unauthorized("Invalid email or password.");
             }
-            //account.NewsArticles = null;
 
             //Generate JWT Token
             IConfiguration configuration = new ConfigurationBuilder()
