@@ -45,7 +45,9 @@ namespace RazorPagesFE.Pages.SystemAccountPage
                     }
                     else
                     {
-                        Message = "Failed to create new account.";
+                        var errorContent = await response.Content.ReadAsStringAsync();
+                        var errorResponse = JsonConvert.DeserializeObject<ErrorResponse>(errorContent);
+                        throw new Exception(errorResponse.Error.Message);
                     }
                 }
 

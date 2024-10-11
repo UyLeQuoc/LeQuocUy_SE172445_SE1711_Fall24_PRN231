@@ -66,12 +66,12 @@ namespace OdataAPI.Controllers
             }
         }
 
-        [HttpPut("/odata/Tags/{key}")]
-        public IActionResult Put([FromRoute] int key, [FromBody] Tag tag)
+        [HttpPut("/odata/Tags/{id}")]
+        public IActionResult Put([FromRoute] int id, [FromBody] Tag tag)
         {
             try
             {
-                if (key != tag.TagId)
+                if (id != tag.TagId)
                 {
                     return BadRequest("Tag ID mismatch.");
                 }
@@ -85,12 +85,12 @@ namespace OdataAPI.Controllers
             }
         }
 
-        [HttpDelete("/odata/Tags/{key}")]
-        public IActionResult Delete([FromRoute] int key)
+        [HttpDelete("/odata/Tags/{id}")]
+        public IActionResult Delete([FromRoute] int id)
         {
             try
             {
-                tagService.RemoveTag(key);
+                tagService.RemoveTag(id);
                 return NoContent();
             }
             catch (Exception e)

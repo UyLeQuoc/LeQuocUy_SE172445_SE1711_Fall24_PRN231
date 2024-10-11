@@ -29,7 +29,7 @@
                                 <a class="nav-link text-dark" asp-area="" asp-page="/SystemAccountPage/Index">System Account</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/ReportPage/Index">Report</a>
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Report/Index">Report</a>
                             </li>
                         }
                         @if (Context.Session.GetString("Role") == "1")
@@ -48,7 +48,7 @@
                         @if (Context.Session.GetString("Role") != null)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/ProfilePage/Index">Profile</a>
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Profile/Index">Profile</a>
                             </li>
                         }
                     </ul>

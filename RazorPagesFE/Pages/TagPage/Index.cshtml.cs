@@ -20,7 +20,7 @@ namespace RazorPagesFE.Pages.TagPage
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonString = await response.Content.ReadAsStringAsync();
-                    Tags = JsonConvert.DeserializeObject<List<Tag>>(jsonString);
+                    Tags = JsonConvert.DeserializeObject<ODataResponse<Tag>>(jsonString).Value;
                 }
             }
         }

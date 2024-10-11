@@ -88,7 +88,6 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                         NewsArticles = new List<NewsArticle>();
                     }
 
-                    // Load Tags for filtering options
                     var tagResponse = await httpClient.GetAsync($"http://localhost:5178/odata/Tags");
                     if (tagResponse.IsSuccessStatusCode)
                     {
