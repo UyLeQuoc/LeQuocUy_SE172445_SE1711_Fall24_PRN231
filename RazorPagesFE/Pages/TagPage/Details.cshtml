@@ -1,0 +1,23 @@
+﻿@page "{id}"
+@model RazorPagesFE.Pages.TagPage.DetailsModel
+
+@{
+    ViewData["Title"] = "Tag Details";
+}
+
+<h1>Tag Details</h1>
+
+<div>
+    <h4>Tag</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Tag Name</dt>
+        <dd class="col-sm-10">@Model.Tag.TagName</dd>
+        <dt class="col-sm-2">Note</dt>
+        <dd class="col-sm-10">@Model.Tag.Note</dd>
+    </dl>
+</div>
+<p>
+    <a asp-page="./Edit" asp-route-id="@Model.Tag.TagId" class="btn btn-primary">Edit</a> |
+    <a asp-page="./Index" class="btn btn-secondary">Back to List</a>
+</p>
