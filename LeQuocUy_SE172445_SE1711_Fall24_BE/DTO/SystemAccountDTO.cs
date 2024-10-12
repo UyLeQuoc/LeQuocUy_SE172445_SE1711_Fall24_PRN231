@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace DTO
 {
@@ -7,13 +6,13 @@ namespace DTO
     {
         [Key]
         public short AccountId { get; set; }
-
+        [Required]
         public string? AccountName { get; set; }
-
+        [Required]
         public string? AccountEmail { get; set; }
-
+        [Required]
         public int? AccountRole { get; set; }
-        [JsonIgnore]
+        [Required]
         public string? AccountPassword { get; set; }
 
         public virtual ICollection<NewsArticleResponse> NewsArticles { get; set; } = new List<NewsArticleResponse>();
