@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DTO\DTO.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -24,6 +20,10 @@
 
   <ItemGroup>
     <None Include="D:\School\Sem8\PRN231\LeQuocUy_SE172445_SE1711_Fall24_PRN231\RazorPagesFE\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Sem8\PRN231\LeQuocUy_SE172445_SE1711_Fall24_BE\DTO\DTO.csproj" />
   </ItemGroup>
 
 </Project>
