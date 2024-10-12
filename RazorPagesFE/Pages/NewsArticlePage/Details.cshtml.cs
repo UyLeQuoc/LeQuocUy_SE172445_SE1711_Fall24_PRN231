@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -8,7 +8,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
 {
     public class DetailsModel : PageModel
     {
-        public NewsArticle NewsArticle { get; set; }
+        public NewsArticleResponse NewsArticle { get; set; }
         public string Message { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string id)
@@ -35,7 +35,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
-                        NewsArticle = JsonConvert.DeserializeObject<NewsArticle>(jsonString);
+                        NewsArticle = JsonConvert.DeserializeObject<NewsArticleResponse>(jsonString);
                     }
                     else
                     {

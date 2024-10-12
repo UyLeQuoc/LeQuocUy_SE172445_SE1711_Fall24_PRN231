@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -8,7 +8,7 @@ namespace RazorPagesFE.Pages.SystemAccountPage
 {
     public class IndexModel : PageModel
     {
-        public List<SystemAccount> SystemAccounts { get; set; } = new List<SystemAccount>();
+        public List<SystemAccountDTO> SystemAccounts { get; set; } = new List<SystemAccountDTO>();
         public string Message { get; set; } = string.Empty;
         public int TotalCount { get; set; }
         public int PageSize { get; set; } = 3;
@@ -80,14 +80,14 @@ namespace RazorPagesFE.Pages.SystemAccountPage
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
-                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<SystemAccount>>(jsonString);
+                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<SystemAccountDTO>>(jsonString);
 
                         SystemAccounts = odataResponse.Value;
                         TotalCount = odataResponse.Count;
                     }
                     else
                     {
-                        SystemAccounts = new List<SystemAccount>();
+                        SystemAccounts = new List<SystemAccountDTO>();
                     }
                 }
 

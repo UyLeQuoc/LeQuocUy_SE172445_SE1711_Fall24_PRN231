@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -10,7 +10,7 @@ namespace RazorPagesFE.Pages.SystemAccountPage
     public class CreateModel : PageModel
     {
         [BindProperty]
-        public SystemAccount SystemAccount { get; set; }
+        public SystemAccountDTO SystemAccount { get; set; }
 
         public string Message { get; set; }
 

@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -8,7 +8,7 @@ namespace RazorPagesFE.Pages.CategoryPage
 {
     public class DetailsModel : PageModel
     {
-        public Category Category { get; set; }
+        public CategoryDTO Category { get; set; }
 
         public string Message { get; set; }
 
@@ -36,7 +36,7 @@ namespace RazorPagesFE.Pages.CategoryPage
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
-                        Category = JsonConvert.DeserializeObject<Category>(jsonString);
+                        Category = JsonConvert.DeserializeObject<CategoryDTO>(jsonString);
                     }
                     else
                     {

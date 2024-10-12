@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -8,8 +8,8 @@ namespace RazorPagesFE.Pages.NewsArticlePage
 {
     public class IndexModel : PageModel
     {
-        public List<NewsArticle> NewsArticles { get; set; } = new List<NewsArticle>();
-        public List<Tag> Tags { get; set; } = new List<Tag>();
+        public List<NewsArticleResponse> NewsArticles { get; set; } = new List<NewsArticleResponse>();
+        public List<TagDTO> Tags { get; set; } = new List<TagDTO>();
         public string Message { get; set; } = string.Empty;
         public int TotalCount { get; set; }
         public int PageSize { get; set; } = 3;
@@ -83,21 +83,21 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
-                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<NewsArticle>>(jsonString);
+                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<NewsArticleResponse>>(jsonString);
 
                         NewsArticles = odataResponse.Value;
                         TotalCount = odataResponse.Count;
                     }
                     else
                     {
-                        NewsArticles = new List<NewsArticle>();
+                        NewsArticles = new List<NewsArticleResponse>();
                     }
 
                     var tagResponse = await httpClient.GetAsync($"http://localhost:5178/odata/Tags");
                     if (tagResponse.IsSuccessStatusCode)
                     {
                         var tagJsonString = await tagResponse.Content.ReadAsStringAsync();
-                        Tags = JsonConvert.DeserializeObject<ODataResponse<Tag>>(tagJsonString).Value;
+                        Tags = JsonConvert.DeserializeObject<ODataResponse<TagDTO>>(tagJsonString).Value;
                     }
                 }
 

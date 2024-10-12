@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
 using System.Net.Http.Headers;
@@ -7,7 +7,7 @@ namespace RazorPagesFE.Pages.TagPage
 {
     public class IndexModel : PageModel
     {
-        public List<Tag> Tags { get; set; } = new List<Tag>();
+        public List<TagDTO> Tags { get; set; } = new List<TagDTO>();
         public string Message { get; set; } = string.Empty;
 
         public async Task OnGetAsync()
@@ -26,7 +26,7 @@ namespace RazorPagesFE.Pages.TagPage
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonString = await response.Content.ReadAsStringAsync();
-                    Tags = JsonConvert.DeserializeObject<ODataResponse<Tag>>(jsonString).Value;
+                    Tags = JsonConvert.DeserializeObject<ODataResponse<TagDTO>>(jsonString).Value;
                 }
             }
         }

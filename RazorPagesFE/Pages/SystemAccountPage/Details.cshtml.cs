@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -8,7 +8,7 @@ namespace RazorPagesFE.Pages.SystemAccountPage
 {
     public class DetailsModel : PageModel
     {
-        public SystemAccount SystemAccount { get; set; }
+        public SystemAccountDTO SystemAccount { get; set; }
         public string Message { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
@@ -29,7 +29,7 @@ namespace RazorPagesFE.Pages.SystemAccountPage
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
-                        SystemAccount = JsonConvert.DeserializeObject<SystemAccount>(jsonString);
+                        SystemAccount = JsonConvert.DeserializeObject<SystemAccountDTO>(jsonString);
                     }
                     else
                     {

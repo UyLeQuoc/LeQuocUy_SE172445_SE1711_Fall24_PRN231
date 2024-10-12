@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -9,9 +9,9 @@ namespace RazorPagesFE.Pages.CategoryPage
     public class EditModel : PageModel
     {
         [BindProperty]
-        public Category Category { get; set; }
+        public CategoryDTO Category { get; set; }
 
-        public List<Category> ParentCategories { get; set; } = new List<Category>();
+        public List<CategoryDTO> ParentCategories { get; set; } = new List<CategoryDTO>();
 
         public string Message { get; set; } = string.Empty;
 
@@ -39,7 +39,7 @@ namespace RazorPagesFE.Pages.CategoryPage
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
-                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<Category>>(jsonString);
+                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<CategoryDTO>>(jsonString);
                         ParentCategories = odataResponse.Value;
                     }
 
@@ -47,7 +47,7 @@ namespace RazorPagesFE.Pages.CategoryPage
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
-                        Category = JsonConvert.DeserializeObject<Category>(jsonString);
+                        Category = JsonConvert.DeserializeObject<CategoryDTO>(jsonString);
                     }
                     else
                     {

@@ -1,4 +1,4 @@
-using BusinessObjects;
+using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -8,7 +8,7 @@ namespace RazorPagesFE.Pages.Report
 {
     public class IndexModel : PageModel
     {
-        public List<NewsArticle> NewsArticles { get; set; } = new List<NewsArticle>();
+        public List<NewsArticleResponse> NewsArticles { get; set; } = new List<NewsArticleResponse>();
         public bool ReportGenerated { get; set; } = false;
 
         [BindProperty(SupportsGet = true)]
@@ -47,7 +47,7 @@ namespace RazorPagesFE.Pages.Report
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
-                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<NewsArticle>>(jsonString);
+                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<NewsArticleResponse>>(jsonString);
 
                         NewsArticles = odataResponse.Value;
                     }

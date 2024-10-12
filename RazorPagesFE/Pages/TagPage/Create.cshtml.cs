@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -10,7 +10,7 @@ namespace RazorPagesFE.Pages.TagPage
     public class CreateModel : PageModel
     {
         [BindProperty]
-        public Tag Tag { get; set; } = new Tag();
+        public TagDTO Tag { get; set; } = new TagDTO();
 
         public string Message { get; set; }
 

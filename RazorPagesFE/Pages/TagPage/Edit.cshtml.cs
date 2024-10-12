@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -10,7 +10,7 @@ namespace RazorPagesFE.Pages.TagPage
     public class EditModel : PageModel
     {
         [BindProperty]
-        public Tag Tag { get; set; } = new Tag();
+        public TagDTO Tag { get; set; } = new TagDTO();
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -23,7 +23,7 @@ namespace RazorPagesFE.Pages.TagPage
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonString = await response.Content.ReadAsStringAsync();
-                    Tag = JsonConvert.DeserializeObject<Tag>(jsonString);
+                    Tag = JsonConvert.DeserializeObject<TagDTO>(jsonString);
                 }
                 else
                 {

@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -8,7 +8,7 @@ namespace RazorPagesFE.Pages.CategoryPage
 {
     public class IndexModel : PageModel
     {
-        public List<Category> Categories { get; set; } = new List<Category>();
+        public List<CategoryDTO> Categories { get; set; } = new List<CategoryDTO>();
         public string Message { get; set; } = string.Empty;
         public int TotalCount { get; set; }
         public int PageSize { get; set; } = 3;
@@ -66,14 +66,14 @@ namespace RazorPagesFE.Pages.CategoryPage
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
-                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<Category>>(jsonString);
+                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<CategoryDTO>>(jsonString);
 
                         Categories = odataResponse.Value;
                         TotalCount = odataResponse.Count;
                     }
                     else
                     {
-                        Categories = new List<Category>();
+                        Categories = new List<CategoryDTO>();
                     }
                 }
 

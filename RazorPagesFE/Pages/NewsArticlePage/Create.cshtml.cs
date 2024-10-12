@@ -1,5 +1,4 @@
-﻿using BusinessObjects;
-using DTO;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -11,13 +10,13 @@ namespace RazorPagesFE.Pages.NewsArticlePage
     public class CreateModel : PageModel
     {
         [BindProperty]
-        public NewsArticle NewsArticle { get; set; } = new NewsArticle();
+        public NewsArticleResponse NewsArticle { get; set; } = new NewsArticleResponse();
 
         [BindProperty]
         public List<int> SelectedTagIds { get; set; } = new List<int>();
 
-        public List<Category> Categories { get; set; } = new List<Category>();
-        public List<Tag> Tags { get; set; } = new List<Tag>();
+        public List<CategoryDTO> Categories { get; set; } = new List<CategoryDTO>();
+        public List<TagDTO> Tags { get; set; } = new List<TagDTO>();
 
         public string Message { get; set; } = string.Empty;
 
@@ -40,7 +39,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
-                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<Category>>(jsonString);
+                        var odataResponse = JsonConvert.DeserializeObject<ODataResponse<CategoryDTO>>(jsonString);
                         Categories = odataResponse.Value;
                     }
 
@@ -49,7 +48,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                     if (response.IsSuccessStatusCode)
                     {
                         var jsonString = await response.Content.ReadAsStringAsync();
-                        Tags = JsonConvert.DeserializeObject<ODataResponse<Tag>>(jsonString).Value;
+                        Tags = JsonConvert.DeserializeObject<ODataResponse<TagDTO>>(jsonString).Value;
                     }
                 }
 
@@ -81,7 +80,7 @@ namespace RazorPagesFE.Pages.NewsArticlePage
                 {
                     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-                    NewsArticle.Tags = SelectedTagIds.Select(tagId => new Tag { TagId = tagId }).ToList();
+                    NewsArticle.Tags = SelectedTagIds.Select(tagId => new TagDTO { TagId = tagId }).ToList();
 
                     var newsArticleDTO = new NewsArticleDTO
                     {

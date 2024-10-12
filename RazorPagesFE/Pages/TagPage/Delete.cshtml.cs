@@ -1,4 +1,4 @@
-﻿using BusinessObjects;
+﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json;
@@ -9,7 +9,7 @@ namespace RazorPagesFE.Pages.TagPage
     public class DeleteModel : PageModel
     {
         [BindProperty]
-        public Tag Tag { get; set; }
+        public TagDTO Tag { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -22,7 +22,7 @@ namespace RazorPagesFE.Pages.TagPage
                 if (response.IsSuccessStatusCode)
                 {
                     var jsonString = await response.Content.ReadAsStringAsync();
-                    Tag = JsonConvert.DeserializeObject<Tag>(jsonString);
+                    Tag = JsonConvert.DeserializeObject<TagDTO>(jsonString);
                 }
                 else
                 {
