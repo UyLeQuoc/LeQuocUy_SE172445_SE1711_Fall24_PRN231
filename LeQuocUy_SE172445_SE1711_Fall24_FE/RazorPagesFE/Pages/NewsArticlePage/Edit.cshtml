@@ -1,4 +1,4 @@
-﻿@page
+﻿@page "{id}"
 @model RazorPagesFE.Pages.NewsArticlePage.EditModel
 
 @{
@@ -9,6 +9,8 @@
 
 <form method="post">
     <input type="hidden" asp-for="NewsArticle.NewsArticleId" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
     <div class="form-group">
         <label asp-for="NewsArticle.NewsTitle"></label>
         <input asp-for="NewsArticle.NewsTitle" class="form-control" />
@@ -48,7 +50,7 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="NewsArticle.Tags">Tags</label>
+        <label asp-for="SelectedTagIds">Tags</label>
         <select asp-for="SelectedTagIds" class="form-control" multiple>
             @foreach (var tag in Model.Tags)
             {
@@ -63,3 +65,7 @@
     <button type="submit" class="btn btn-primary">Save</button>
     <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

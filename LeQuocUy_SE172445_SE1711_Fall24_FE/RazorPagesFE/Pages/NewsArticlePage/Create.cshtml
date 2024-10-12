@@ -7,7 +7,7 @@
 
 <h1>Create News Article</h1>
 
-@if(Model.Message.Length != 0)
+@if (!string.IsNullOrEmpty(Model.Message))
 {
     <div class="alert alert-danger" role="alert">
         @Model.Message
@@ -15,6 +15,8 @@
 }
 
 <form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
     <div class="form-group">
         <label asp-for="NewsArticle.NewsTitle"></label>
         <input asp-for="NewsArticle.NewsTitle" class="form-control" />
@@ -52,15 +54,20 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="NewsArticle.Tags">Tags</label>
+        <label asp-for="SelectedTagIds">Tags</label>
         <select asp-for="SelectedTagIds" class="form-control" multiple>
             @foreach (var tag in Model.Tags)
             {
                 <option value="@tag.TagId">@tag.TagName</option>
             }
         </select>
+        <span asp-validation-for="SelectedTagIds" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-primary">Create</button>
     <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
